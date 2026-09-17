@@ -1,6 +1,23 @@
 allowBuilds:
   esbuild: true
   vue-demi: true
+
+# Vue must exist exactly once. Two copies in the server bundle make the SSR
+# renderer receive component instances created by the other copy, which fails
+# with `Cannot read properties of null (reading 'ce')` on every page that
+# renders a component (i.e. all of them).
+overrides:
+  vue: 3.5.43
+  '@vue/compiler-core': 3.5.43
+  '@vue/compiler-dom': 3.5.43
+  '@vue/compiler-sfc': 3.5.43
+  '@vue/compiler-ssr': 3.5.43
+  '@vue/reactivity': 3.5.43
+  '@vue/runtime-core': 3.5.43
+  '@vue/runtime-dom': 3.5.43
+  '@vue/server-renderer': 3.5.43
+  '@vue/shared': 3.5.43
+
 minimumReleaseAgeExclude:
   - '@vue/compiler-core@3.5.43'
   - '@vue/compiler-dom@3.5.43'
