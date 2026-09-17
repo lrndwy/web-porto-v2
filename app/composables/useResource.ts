@@ -13,11 +13,22 @@ interface ListResponse<T> {
   pageSize: number
 }
 
+export interface UseResourceOptions {
+  /** Base path override, e.g. the GitHub repository endpoints. */
+  endpoint?: string
+  /** Extra query parameters merged into every list request. */
+  extraQuery?: () => Record<string, unknown>
+}
+
 /**
- * The single client for `/api/admin/resources/**`. Pages never fetch directly
+ * The single client for the admin list endpoints. Pages never fetch directly
  * and never build their own error handling: failures surface as toasts here.
  */
-export function useResource<T extends ResourceRecord = ResourceRecord>(resource: string) {
+export function useResource<T extends ResourceRecord = ResourceRecord>(
+  resource: string,
+  options: UseResourceOptions = {},
+) {
+  const base = options.endpoint ?? `/api/admin/resources/${resource}`
   // shallowRef: the list is always replaced wholesale, never mutated in place.
   const items = shallowRef<T[]>([])
   const total = ref(0)
@@ -29,11 +40,12 @@ export function useResource<T extends ResourceRecord = ResourceRecord>(resource:
   async function refresh() {
     pending.value = true
     try {
-      const response = await $fetch<ListResponse<T>>(`/api/admin/resources/${resource}`, {
+      const response = await $fetch<ListResponse<T>>(base, {
         query: {
           page: page.value,
           pageSize: pageSize.value,
           q: q.value || undefined,
+          ...(options.extraQuery?.() ?? {}),
         },
       })
       items.value = response.items
@@ -47,7 +59,7 @@ export function useResource<T extends ResourceRecord = ResourceRecord>(resource:
 
   async function create(payload: Record<string, unknown>): Promise<T | null> {
     try {
-      const row = await $fetch<T>(`/api/admin/resources/${resource}`, {
+      const row = await $fetch<T>(base, {
         method: 'POST',
         body: payload,
       })
@@ -62,7 +74,7 @@ export function useResource<T extends ResourceRecord = ResourceRecord>(resource:
 
   async function update(id: string, payload: Record<string, unknown>): Promise<T | null> {
     try {
-      const row = await $fetch<T>(`/api/admin/resources/${resource}/${id}`, {
+      const row = await $fetch<T>(`${base}/${id}`, {
         method: 'PATCH',
         body: payload,
       })
@@ -77,7 +89,7 @@ export function useResource<T extends ResourceRecord = ResourceRecord>(resource:
 
   async function remove(id: string): Promise<boolean> {
     try {
-      const endpoint: string = `/api/admin/resources/${resource}/${id}`
+      const endpoint: string = `${base}/${id}`
       await $fetch(endpoint, { method: 'DELETE' })
       // Stepping back a page keeps the operator from landing on an empty list.
       if (items.value.length === 1 && page.value > 1) page.value -= 1
@@ -93,7 +105,7 @@ export function useResource<T extends ResourceRecord = ResourceRecord>(resource:
   async function reorder(ids: string[]): Promise<void> {
     const previous = [...items.value]
     try {
-      await $fetch(`/api/admin/resources/${resource}/reorder`, {
+      await $fetch(`${base}/reorder`, {
         method: 'PATCH',
         body: { ids },
       })

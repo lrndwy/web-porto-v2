@@ -7,6 +7,8 @@ const props = defineProps<{
   modelValue: boolean
   /** Column to patch; documents have both `is_active` and `is_visible`. */
   field?: string
+  /** Base path override, e.g. the GitHub repository endpoints. */
+  endpoint?: string
   label?: string
 }>()
 
@@ -25,15 +27,17 @@ async function onChange(value: boolean) {
   shown.value = value
   pending.value = true
 
+  const base = props.endpoint ?? `/api/admin/resources/${props.resource}`
+
   try {
-    await $fetch(`/api/admin/resources/${props.resource}/${props.id}`, {
+    await $fetch(`${base}/${props.id}`, {
       method: 'PATCH',
       body: { [props.field ?? 'is_visible']: value },
     })
     emit('changed', value)
   } catch (error) {
     shown.value = !value
-    toast.error(errorMessage(error, 'Could not change visibility.'))
+    toast.error(errorMessage(error, 'Could not update this row.'))
   } finally {
     pending.value = false
   }
