@@ -7,6 +7,5 @@
         <slot />
       </div>
     </SidebarInset>
-    <CommandMenu />
   </SidebarProvider>
 </template>
