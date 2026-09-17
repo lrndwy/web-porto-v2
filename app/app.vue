@@ -1,6 +1,12 @@
+<script setup lang="ts">
+import { MotionConfig } from 'motion-v'
+</script>
+
 <template>
-  <div>
+  <MotionConfig reduced-motion="user">
     <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </MotionConfig>
 </template>

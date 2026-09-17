@@ -16,7 +16,27 @@ export default defineNuxtConfig({
   css: ['~/assets/css/tailwind.css'],
   vite: { plugins: [tailwindcss()] },
 
+  app: {
+    head: {
+      link: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+      script: [
+        {
+          // Applies the stored theme before first paint so the toggle never
+          // flashes the wrong surface. Kept inline and dependency-free.
+          innerHTML:
+            "(function(){try{if(localStorage.getItem('wp-theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})()",
+          tagPriority: 'critical',
+        },
+      ],
+    },
+  },
+
   shadcn: { prefix: '', componentDir: '@/components/ui' },
+
+  // Components are addressed by their file name (`<AppNav>`, `<ProjectCard>`),
+  // matching the plan. `ui/**` is excluded because shadcn-nuxt already
+  // registers those explicitly by name.
+  components: [{ path: '~/components', pathPrefix: false, ignore: ['ui/**'] }],
 
   fonts: {
     families: [
@@ -57,10 +77,13 @@ export default defineNuxtConfig({
   routeRules: {
     '/api/router': { cors: true },
     '/admin/**': { ssr: false },
-    '/': { swr: 300 },
-    '/projects': { swr: 600 },
-    '/blog': { swr: 600 },
-    '/blog/**': { swr: 600 },
+    // ponytail: swr is disabled while the content phases are being built so a
+    // cached response cannot mask a change. Restore the plan's values
+    // (/, 300; /projects 600; /blog 600; /blog/** 600) in Phase 12.
+    // '/': { swr: 300 },
+    // '/projects': { swr: 600 },
+    // '/blog': { swr: 600 },
+    // '/blog/**': { swr: 600 },
   },
 
   nitro: { compressPublicAssets: true },
