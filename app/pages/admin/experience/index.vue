@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatDate } from '#shared/utils/format'
 definePageMeta({ layout: 'admin', title: 'Experience' })
 
 const router = useRouter()
