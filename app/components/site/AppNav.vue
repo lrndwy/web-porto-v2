@@ -28,7 +28,7 @@ const logoUrl = computed(() => settings.value?.logo_url ?? null)
         : 'border-transparent'
     "
   >
-    <div class="mx-auto flex h-16 w-full max-w-[1400px] items-center gap-3 px-4 md:px-6">
+    <div class="page-shell flex h-16 items-center gap-3">
       <!-- Brand: the name truncates before it can push the controls off-screen. -->
       <NuxtLink to="/" class="flex min-w-0 items-center gap-2.5">
         <img
@@ -77,13 +77,13 @@ const logoUrl = computed(() => settings.value?.logo_url ?? null)
       <div class="ml-auto flex shrink-0 items-center gap-1.5 md:ml-2">
         <!-- Below `sm` the CV lives in the drawer instead, so the header keeps
              only the brand and one control. -->
-        <Button as-child size="sm" variant="outline" class="hidden shrink-0 active:translate-y-px sm:inline-flex">
+        <Button shape="pill" as-child size="sm" variant="outline" class="hidden shrink-0 active:translate-y-px sm:inline-flex">
           <NuxtLink to="/cv">CV</NuxtLink>
         </Button>
 
         <Sheet v-model:open="mobileOpen">
           <SheetTrigger as-child>
-            <Button variant="ghost" size="icon-sm" class="md:hidden" aria-label="Open menu">
+            <Button shape="pill" variant="ghost" size="icon-sm" class="md:hidden" aria-label="Open menu">
               <Icon name="ph:list" class="size-5" />
             </Button>
           </SheetTrigger>
@@ -125,10 +125,10 @@ const logoUrl = computed(() => settings.value?.logo_url ?? null)
             </nav>
 
             <div class="border-border/70 flex items-center gap-2 border-t px-5 py-4">
-              <Button as-child class="flex-1 active:translate-y-px">
+              <Button shape="pill" as-child class="flex-1 active:translate-y-px">
                 <NuxtLink to="/cv">View CV</NuxtLink>
               </Button>
-              <Button
+              <Button shape="pill"
                 variant="outline"
                 size="icon-sm"
                 :aria-label="theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"

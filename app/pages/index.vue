@@ -52,7 +52,7 @@ const heroStats = computed(() => {
          weight that a taller, emptier hero would have spent on whitespace. -->
     <section class="border-border/70 border-b">
       <div
-        class="mx-auto grid w-full max-w-[1400px] gap-10 px-6 pt-12 pb-12 md:grid-cols-[1.45fr_1fr] md:items-end md:gap-16 md:pt-16 md:pb-14"
+        class="page-shell grid gap-10 pt-12 pb-12 md:grid-cols-[1.45fr_1fr] md:items-end md:gap-16 md:pt-16 md:pb-14"
       >
         <RevealOnScroll>
           <p
@@ -76,7 +76,7 @@ const heroStats = computed(() => {
 
           <div class="mt-8 flex flex-wrap items-center gap-3">
             <MagneticCta to="/projects" label="View Projects" />
-            <Button as-child variant="ghost" class="active:translate-y-px">
+            <Button shape="pill" as-child variant="ghost" class="active:translate-y-px">
               <NuxtLink to="/about">
                 Read About Me
                 <Icon name="ph:arrow-right" />
@@ -151,7 +151,7 @@ const heroStats = computed(() => {
       </div>
 
       <div class="mt-8">
-        <Button as-child variant="outline" class="active:translate-y-px">
+        <Button shape="pill" as-child variant="outline" class="active:translate-y-px">
           <NuxtLink to="/projects">All projects</NuxtLink>
         </Button>
       </div>
@@ -162,7 +162,7 @@ const heroStats = computed(() => {
     <SectionShell v-if="experiences?.length" id="experience">
       <div class="flex flex-wrap items-end justify-between gap-6">
         <SectionHeading overline="Career" title="Experience" />
-        <Button as-child variant="outline" class="rounded-full active:scale-[0.98]">
+        <Button shape="pill" as-child variant="outline" class="rounded-full active:scale-[0.98]">
           <NuxtLink to="/experience">
             Full history
             <Icon name="ph:arrow-right" />
@@ -198,7 +198,7 @@ const heroStats = computed(() => {
         </RevealOnScroll>
       </div>
       <div class="mt-8">
-        <Button as-child variant="outline" class="active:translate-y-px">
+        <Button shape="pill" as-child variant="outline" class="active:translate-y-px">
           <NuxtLink to="/blog">All articles</NuxtLink>
         </Button>
       </div>
@@ -209,7 +209,7 @@ const heroStats = computed(() => {
       <SectionHeading
         overline="Infrastructure"
         title="AI Router"
-        description="One endpoint, multiple AI providers, a quota the owner controls."
+        description="Free AI—no login or payment required."
       />
       <div class="mt-10">
         <RouterEndpointCard :info="info" wide />
@@ -241,7 +241,7 @@ const heroStats = computed(() => {
             </div>
 
             <div class="flex flex-col gap-4 lg:items-end">
-              <Button
+              <Button shape="pill"
                 v-if="profile.email"
                 as-child
                 size="lg"
@@ -259,7 +259,7 @@ const heroStats = computed(() => {
                 {{ profile.email }}
               </p>
 
-              <Button as-child variant="outline" size="lg" class="rounded-full active:scale-[0.98]">
+              <Button shape="pill" as-child variant="outline" size="lg" class="rounded-full active:scale-[0.98]">
                 <NuxtLink to="/cv">
                   <Icon name="ph:file-text" />
                   Download CV

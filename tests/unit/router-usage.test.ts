@@ -36,7 +36,7 @@ test('parseUsage returns zeros for missing or malformed usage', () => {
 
 test('public keys carry the expected shape and hash stably', async () => {
   const key = generatePublicKey()
-  assert.match(key, /^pk_portfolio_[0-9A-Za-z]{32}$/)
+  assert.match(key, /^pk_uhuy_[0-9A-Za-z]{32}$/)
   assert.notEqual(key, generatePublicKey())
 
   const digest = await sha256hex(key)

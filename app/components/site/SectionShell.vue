@@ -4,7 +4,7 @@ defineProps<{ id: string }>()
 
 <template>
   <section :id="id" class="py-20 md:py-28">
-    <div class="mx-auto w-full max-w-[1400px] px-6">
+    <div class="page-shell">
       <slot />
     </div>
   </section>

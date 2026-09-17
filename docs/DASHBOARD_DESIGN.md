@@ -295,7 +295,7 @@ Public key card:
 ``` text
 Public API Key
 
-pk_portfolio_xxxxxxxxxxxxx
+pk_uhuy_xxxxxxxxxxxxx
 
 Created
 17 Sep 2026

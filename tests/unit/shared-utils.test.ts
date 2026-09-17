@@ -3,11 +3,13 @@ import assert from 'node:assert/strict'
 
 import { slugify, uniqueSlug } from '../../shared/utils/slug.ts'
 import { isBotUserAgent, parseUserAgent } from '../../shared/utils/ua.ts'
+import { isPublicKey } from '../../shared/utils/hash.ts'
 import {
   formatDate,
   formatDuration,
   formatMonthRange,
   formatPercent,
+  readingMinutes,
 } from '../../shared/utils/format.ts'
 
 const CHROME_UA =
@@ -131,4 +133,41 @@ test('formatDuration measures a current role to today', () => {
 
 test('formatDuration refuses to guess from an unparseable date', () => {
   assert.equal(formatDuration('not-a-date', null, false), '—')
+})
+
+test('readingMinutes counts words nested in the TipTap tree', () => {
+  const doc = {
+    type: 'doc',
+    content: [
+      { type: 'paragraph', content: [{ type: 'text', text: 'one two three' }] },
+      {
+        type: 'bulletList',
+        content: [{ type: 'listItem', content: [{ type: 'text', text: 'four five' }] }],
+      },
+    ],
+  }
+  // Five words rounds to one minute, never zero.
+  assert.equal(readingMinutes(doc), 1)
+})
+
+test('readingMinutes scales with length and tolerates junk input', () => {
+  const words = Array.from({ length: 660 }, (_, i) => `w${i}`).join(' ')
+  const doc = { type: 'doc', content: [{ type: 'text', text: words }] }
+  assert.equal(readingMinutes(doc), 3)
+  assert.equal(readingMinutes(null), 1)
+  assert.equal(readingMinutes({ type: 'doc' }), 1)
+})
+
+test('isPublicKey accepts complete keys and rejects truncated prefixes', () => {
+  const body = 'A1'.repeat(16) // exactly the 32-character key body
+
+  assert.equal(isPublicKey(`pk_uhuy_${body}`), true)
+  // Keys issued under the older prefix must keep working and displaying.
+  assert.equal(isPublicKey(`pk_portfolio_${body}`), true)
+
+  // A 20-character legacy prefix looks like a key but cannot be used as one.
+  assert.equal(isPublicKey('pk_portfolio_L92cvgG'), false)
+  assert.equal(isPublicKey(`pk_uhuy_${body.slice(0, 31)}`), false)
+  assert.equal(isPublicKey(null), false)
+  assert.equal(isPublicKey(undefined), false)
 })

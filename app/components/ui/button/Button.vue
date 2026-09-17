@@ -9,6 +9,9 @@ import { buttonVariants } from "."
 interface Props extends PrimitiveProps {
   variant?: ButtonVariants["variant"]
   size?: ButtonVariants["size"]
+  /** `pill` is the public site's fully rounded button; the owner dashboard
+   *  keeps the tighter default radius. */
+  shape?: ButtonVariants["shape"]
   class?: HTMLAttributes["class"]
 }
 
@@ -24,7 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
     :data-size="size"
     :as="as"
     :as-child="asChild"
-    :class="cn(buttonVariants({ variant, size }), props.class)"
+    :class="cn(buttonVariants({ variant, size, shape }), props.class)"
   >
     <slot />
   </Primitive>

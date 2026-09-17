@@ -1,5 +1,10 @@
 <script setup lang="ts">
-const props = defineProps<{ value: string; label?: string }>()
+const props = withDefaults(
+  defineProps<{ value: string; label?: string; shape?: 'default' | 'pill' }>(),
+  // Pill by default: this button lives on public pages. The owner dashboard
+  // passes `default` so its toolbars keep the tighter radius.
+  { shape: 'pill' },
+)
 
 const copied = ref(false)
 
@@ -18,6 +23,7 @@ async function copy() {
   <Button
     variant="ghost"
     size="icon-sm"
+    :shape="props.shape"
     :aria-label="props.label ?? 'Copy to clipboard'"
     @click="copy"
   >

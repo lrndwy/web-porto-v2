@@ -174,6 +174,16 @@
   max-width: 720px;
 }
 
+/* One container for every public page, so the side gutter cannot drift between
+   the nav, the sections and the footer. Fluid, so mobile keeps a usable column
+   and wide screens get a real margin instead of edge-to-edge text. */
+@utility page-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1340px;
+  padding-inline: clamp(1.5rem, 5vw, 4.5rem);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

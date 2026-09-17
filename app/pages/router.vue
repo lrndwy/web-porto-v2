@@ -9,16 +9,14 @@ useSeo({
 })
 
 // The working key is published by design: the router is a demo endpoint, so a
-// visitor needs a key that actually works. Keys created before the plaintext
-// column existed fall back to their prefix.
-const displayKey = computed(
-  () => info.value?.key ?? (info.value?.key_prefix ? `${info.value.key_prefix}…` : null),
-)
-const copyKey = computed(() => info.value?.key ?? info.value?.key_prefix ?? '')
+// visitor needs a key that actually works. Absent means no complete key has been
+// issued yet — never render or copy a partial value, because a truncated key
+// looks usable and then fails at the first request.
+const displayKey = computed(() => info.value?.key ?? null)
 
 const curlExample = computed(
   () => `curl ${info.value?.endpoint ?? 'https://example.com/api/router'} \\
-  -H "Authorization: Bearer ${info.value?.key ?? `${info.value?.key_prefix ?? 'pk_portfolio_xxx'}...`}" \\
+  -H "Authorization: Bearer ${info.value?.key ?? '$PUBLIC_KEY'}" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "${info.value?.models[0]?.display_name ?? 'model-name'}",
@@ -56,7 +54,7 @@ const percentUsed = computed(() => {
           <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Endpoint</p>
           <p class="font-mono text-base break-all md:text-lg">{{ info.endpoint }}</p>
         </div>
-        <Button as-child variant="outline" class="shrink-0 self-start active:translate-y-px md:self-auto">
+        <Button shape="pill" as-child variant="outline" class="shrink-0 self-start active:translate-y-px md:self-auto">
           <a :href="info.endpoint" target="_blank" rel="noopener noreferrer">
             <Icon name="ph:arrow-up-right" />
             Open endpoint
@@ -72,12 +70,12 @@ const percentUsed = computed(() => {
               <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
                 Public API key
               </p>
-              <CopyButton v-if="displayKey" :value="copyKey" label="Copy the public key" />
+              <CopyButton v-if="displayKey" :value="displayKey" label="Copy the public key" />
             </div>
 
             <p v-if="displayKey" class="font-mono text-sm break-all select-all">{{ displayKey }}</p>
             <p v-else class="text-caption text-muted-foreground">
-              No active key. The owner can generate one in the dashboard.
+              No key is published yet. The owner can generate one in the dashboard.
             </p>
 
             <p class="text-caption text-muted-foreground">
@@ -165,7 +163,7 @@ const percentUsed = computed(() => {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button as-child variant="outline" class="active:translate-y-px">
+            <Button shape="pill" as-child variant="outline" class="active:translate-y-px">
               <NuxtLink to="/">Back home</NuxtLink>
             </Button>
           </EmptyContent>

@@ -1,7 +1,7 @@
 /**
  * End-to-end probe for the public AI Router.
  *
- *   ROUTER_BASE=http://localhost:3000 ROUTER_KEY=pk_portfolio_... \
+ *   ROUTER_BASE=http://localhost:3000 ROUTER_KEY=pk_uhuy_... \
  *     node scripts/router-probe.mjs
  *
  * Optionally set SUPABASE_URL and SUPABASE_SECRET_KEY to also assert that one
@@ -19,7 +19,7 @@ const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY
 const MODEL = process.env.ROUTER_MODEL ?? 'mock-model'
 
 if (!KEY) {
-  console.error('ROUTER_KEY is required, e.g. ROUTER_KEY=pk_portfolio_... node scripts/router-probe.mjs')
+  console.error('ROUTER_KEY is required, e.g. ROUTER_KEY=pk_uhuy_... node scripts/router-probe.mjs')
   process.exit(2)
 }
 
@@ -110,7 +110,7 @@ if (original) await supabase('ai_rate_limits?id=not.is.null', { method: 'DELETE'
 
 // 2. An unknown key.
 {
-  const result = await callRouter({ key: 'pk_portfolio_invalid' })
+  const result = await callRouter({ key: 'pk_uhuy_invalid' })
   check('invalid key returns 401', result.status === 401, `got ${result.status}`)
   check('error code is invalid_api_key', result.json?.error?.code === 'invalid_api_key')
 }

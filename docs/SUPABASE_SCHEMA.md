@@ -331,8 +331,17 @@ Unique:
   created_at     timestamptz
   revoked_at     timestamptz nullable
 
-Public API key sebaiknya hanya ditampilkan saat creation/regeneration.
-Simpan hash untuk validasi dan prefix untuk identifikasi.
+Public API key selalu ditampilkan penuh, bukan hanya saat creation/regeneration.
+Kunci ini memang publik — `/router` mempublikasikannya supaya pengunjung punya
+kunci yang benar-benar bisa dipakai — jadi menyimpannya utuh tidak membocorkan
+apa pun; yang membatasi pemakaian adalah rate limit dan kuota bulanan.
+
+  - `key_prefix` menyimpan kunci lengkap (`pk_uhuy_` + 32 karakter). Baris lama
+    yang hanya berisi 20 karakter pertama tidak bisa dipulihkan menjadi kunci
+    yang berfungsi, jadi diperlakukan sebagai "belum ada kunci" dan tidak pernah
+    ditampilkan atau dicopy sebagian.
+  - `key_hash` tetap menjadi jalur validasi (`sha256` dari kunci yang dikirim).
+    Kolom ini tidak pernah keluar dari server.
 
 ### `ai_usage_logs`
 

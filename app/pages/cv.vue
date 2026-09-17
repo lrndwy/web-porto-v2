@@ -39,7 +39,7 @@ onMounted(refresh)
             {{ [document.version, document.file_type].filter(Boolean).join(' · ') || 'PDF' }}
           </p>
         </div>
-        <Button as-child variant="outline" class="active:translate-y-px">
+        <Button shape="pill" as-child variant="outline" class="active:translate-y-px">
           <a
             :href="document.url ?? '#'"
             download

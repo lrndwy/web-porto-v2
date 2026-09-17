@@ -81,3 +81,29 @@ export function formatDuration(
   if (years) return `${years} yr`
   return `${months} mo`
 }
+
+const WPM = 220
+
+function collectText(node: unknown, out: string[]): void {
+  if (!node || typeof node !== 'object') return
+  const record = node as { text?: unknown; content?: unknown }
+  if (typeof record.text === 'string') out.push(record.text)
+  if (Array.isArray(record.content)) {
+    for (const child of record.content) collectText(child, out)
+  }
+}
+
+/**
+ * Estimated reading time in whole minutes for a TipTap document. Walks the node
+ * tree rather than the rendered HTML so it also works during SSR, where the
+ * editor has not mounted. Never returns 0 — a one-line post still takes a minute.
+ */
+export function readingMinutes(content: unknown): number {
+  const parts: string[] = []
+  collectText(content, parts)
+  const words = parts
+    .join(' ')
+    .split(/\s+/)
+    .filter(Boolean).length
+  return Math.max(1, Math.round(words / WPM))
+}

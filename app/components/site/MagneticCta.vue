@@ -43,7 +43,7 @@ function reset() {
     @mousemove="onMove"
     @mouseleave="reset"
   >
-    <Button as-child class="active:translate-y-px">
+    <Button shape="pill" as-child class="active:translate-y-px">
       <NuxtLink :to="props.to">{{ props.label }}</NuxtLink>
     </Button>
   </Motion>

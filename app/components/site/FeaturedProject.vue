@@ -23,7 +23,7 @@ const meta = computed(() =>
       <p class="text-caption text-muted-foreground font-mono">{{ meta }}</p>
 
       <div class="flex flex-wrap items-center gap-4 pt-1">
-        <Button as-child size="sm" variant="outline" class="active:translate-y-px">
+        <Button shape="pill" as-child size="sm" variant="outline" class="active:translate-y-px">
           <a
             :href="props.project.html_url"
             target="_blank"

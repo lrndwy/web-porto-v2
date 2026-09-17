@@ -18,7 +18,7 @@ useSeo({ title: 'Contact', description: 'Projects, ideas, and opportunities.' })
         />
 
         <div v-if="profile?.email" class="flex flex-col gap-3">
-          <Button as-child size="lg" class="self-start active:translate-y-px">
+          <Button shape="pill" as-child size="lg" class="self-start active:translate-y-px">
             <a :href="`mailto:${profile.email}`" @click="trackEvent('contact_submit')">
               <Icon name="ph:envelope" />
               {{ profile.email }}

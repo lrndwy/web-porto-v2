@@ -158,7 +158,7 @@ Validation:
 
 Generate one key:
 
-`pk_portfolio_<random>`
+`pk_uhuy_<random>`
 
 Capabilities:
 

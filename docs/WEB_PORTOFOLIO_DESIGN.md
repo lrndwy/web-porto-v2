@@ -302,7 +302,7 @@ https://domain.com/api/router
 Public API key:
 
 ``` text
-pk_portfolio_xxxxxxxxx
+pk_uhuy_xxxxxxxxx
 
 [Copy]
 ```
@@ -335,7 +335,7 @@ Gemini
 
 ``` bash
 curl https://domain.com/api/router \
-  -H "Authorization: Bearer pk_portfolio_xxx" \
+  -H "Authorization: Bearer pk_uhuy_xxx" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "model-name",

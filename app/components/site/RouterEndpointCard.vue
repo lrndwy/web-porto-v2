@@ -14,12 +14,9 @@ const percentUsed = computed(() => {
   return Math.min(100, Math.round((used / limit) * 100))
 })
 
-// The working key is published by design; the prefix is the fallback for keys
-// created before the plaintext column existed.
-const displayKey = computed(
-  () => props.info.key ?? (props.info.key_prefix ? `${props.info.key_prefix}…` : null),
-)
-const copyValue = computed(() => props.info.key ?? props.info.key_prefix ?? '')
+// The working key is published by design. Nothing is shown when it is absent:
+// a partial key would look usable and fail on the first request.
+const displayKey = computed(() => props.info.key ?? null)
 
 /**
  * One restrained accent wash, kept inside the card. Everything else about the
@@ -60,7 +57,7 @@ const wash = {
                 </p>
                 <div class="flex items-start gap-2">
                   <p class="text-caption font-mono break-all select-all">{{ displayKey }}</p>
-                  <CopyButton :value="copyValue" label="Copy the public key" />
+                  <CopyButton :value="displayKey" label="Copy the public key" />
                 </div>
               </div>
             </div>
@@ -82,7 +79,7 @@ const wash = {
 
               <Progress :model-value="percentUsed" />
 
-              <Button as-child variant="outline" class="w-fit rounded-full active:scale-[0.98]">
+              <Button shape="pill" as-child variant="outline" class="w-fit rounded-full active:scale-[0.98]">
                 <NuxtLink to="/router">
                   Open the router
                   <Icon name="ph:arrow-right" />

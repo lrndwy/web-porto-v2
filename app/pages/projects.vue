@@ -32,7 +32,7 @@ const rest = computed(() => filtered.value.filter((project) => project.id !== fe
     />
 
     <div v-if="projects?.length" class="mt-8 flex flex-wrap items-center gap-2">
-      <Button
+      <Button shape="pill"
         size="sm"
         :variant="activeLanguage === null ? 'default' : 'outline'"
         :aria-pressed="activeLanguage === null"
@@ -40,7 +40,7 @@ const rest = computed(() => filtered.value.filter((project) => project.id !== fe
       >
         All languages
       </Button>
-      <Button
+      <Button shape="pill"
         v-for="language in languages"
         :key="language"
         size="sm"
@@ -50,7 +50,7 @@ const rest = computed(() => filtered.value.filter((project) => project.id !== fe
       >
         {{ language }}
       </Button>
-      <Button
+      <Button shape="pill"
         size="sm"
         :variant="featuredOnly ? 'default' : 'outline'"
         :aria-pressed="featuredOnly"
@@ -87,7 +87,7 @@ const rest = computed(() => filtered.value.filter((project) => project.id !== fe
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent v-if="!projects?.length">
-          <Button as-child variant="outline" class="active:translate-y-px">
+          <Button shape="pill" as-child variant="outline" class="active:translate-y-px">
             <NuxtLink to="/contact">Get in touch</NuxtLink>
           </Button>
         </EmptyContent>

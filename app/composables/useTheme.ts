@@ -3,12 +3,12 @@ export type Theme = 'light' | 'dark'
 const STORAGE_KEY = 'wp-theme'
 
 /**
- * Light-first theme control. The pre-hydration script in nuxt.config sets the
- * `.dark` class from localStorage before first paint, so this composable only
- * has to reflect that state and keep it in sync afterwards.
+ * Dark-first theme control. The pre-hydration script in nuxt.config adds the
+ * `.dark` class before first paint unless the visitor has explicitly chosen
+ * light, so this composable only reflects that state and keeps it in sync.
  */
 export function useTheme() {
-  const theme = useState<Theme>('wp-theme', () => 'light')
+  const theme = useState<Theme>('wp-theme', () => 'dark')
   const synced = useState('wp-theme-synced', () => false)
 
   // Runs after hydration so the toggle's markup matches what the server sent.

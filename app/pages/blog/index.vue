@@ -63,7 +63,7 @@ const isFiltered = computed(() => !!search.value || !!activeCategory.value)
           aria-label="Search articles"
           class="pl-9"
         />
-        <Button
+        <Button shape="pill"
           v-if="searchInput"
           variant="ghost"
           size="icon-xs"
@@ -77,7 +77,7 @@ const isFiltered = computed(() => !!search.value || !!activeCategory.value)
 
       <!-- Categories -->
       <div v-if="categories?.length" class="flex flex-wrap items-center gap-2">
-        <Button
+        <Button shape="pill"
           size="sm"
           :variant="activeCategory === null ? 'default' : 'outline'"
           :aria-pressed="activeCategory === null"
@@ -85,7 +85,7 @@ const isFiltered = computed(() => !!search.value || !!activeCategory.value)
         >
           All
         </Button>
-        <Button
+        <Button shape="pill"
           v-for="category in categories"
           :key="category.id"
           size="sm"
@@ -136,7 +136,7 @@ const isFiltered = computed(() => !!search.value || !!activeCategory.value)
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent v-if="isFiltered">
-          <Button
+          <Button shape="pill"
             variant="outline"
             class="active:translate-y-px"
             @click="
@@ -153,7 +153,7 @@ const isFiltered = computed(() => !!search.value || !!activeCategory.value)
     </div>
 
     <div v-if="hasMore" class="mt-12 flex justify-center">
-      <Button variant="outline" class="active:translate-y-px" :disabled="pending" @click="page += 1">
+      <Button shape="pill" variant="outline" class="active:translate-y-px" :disabled="pending" @click="page += 1">
         {{ pending ? 'Loading…' : 'Load more' }}
       </Button>
     </div>

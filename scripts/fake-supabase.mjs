@@ -88,7 +88,7 @@ const db = {
     { id: 'cccccccc-0000-4000-8000-000000000001', provider_id: 'bbbbbbbb-0000-4000-8000-000000000001', model_name: 'gpt-4o-mini', display_name: 'gpt-4o-mini', input_price: 0.15, output_price: 0.6, is_active: true, created_at: now(), updated_at: now() },
   ],
   ai_api_keys: [
-    { id: uuid(), key_prefix: 'pk_portfolio_7f3a9c', key_hash: 'stub-hash', label: 'Default', is_active: true, last_used_at: '2026-09-17T20:00:00Z', created_at: now(), revoked_at: null },
+    { id: uuid(), key_prefix: 'pk_uhuy_7f3a9cK2mQ8vRtYb4nH6jLpWd5xZc1E', key_hash: 'stub-hash', label: 'Default', is_active: true, last_used_at: '2026-09-17T20:00:00Z', created_at: now(), revoked_at: null },
   ],
   ai_usage_logs: [
     { id: uuid(), api_key_id: null, provider_id: 'bbbbbbbb-0000-4000-8000-000000000001', model_id: 'cccccccc-0000-4000-8000-000000000001', request_id: 'req-1', input_tokens: 120, output_tokens: 80, total_tokens: 200, status_code: 200, latency_ms: 840, error_code: null, created_at: now() },

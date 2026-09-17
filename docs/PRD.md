@@ -298,7 +298,7 @@ Sistem menyediakan satu public API key untuk router.
 
 Contoh:
 
-`pk_portfolio_xxxxxxxxx`
+`pk_uhuy_xxxxxxxxx`
 
 Provider secret key tidak pernah dikirim ke client.
 

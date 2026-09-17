@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatDate } from '#shared/utils/format'
+import { isPublicKey } from '#shared/utils/hash'
 import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'admin', title: 'API Key' })
@@ -7,7 +8,6 @@ definePageMeta({ layout: 'admin', title: 'API Key' })
 interface ApiKeyRow {
   id: string
   key_prefix: string
-  key_plain: string | null
   label: string | null
   is_active: boolean
   last_used_at: string | null
@@ -18,6 +18,9 @@ interface ApiKeyRow {
 const { data: key, refresh } = await useAsyncData('admin-api-key', () =>
   $fetch<ApiKeyRow | null>('/api/admin/router/api-key'),
 )
+
+/** A key stored before the whole value was kept holds 20 characters only. */
+const completeKey = computed(() => (isPublicKey(key.value?.key_prefix) ? key.value!.key_prefix : null))
 
 const working = ref(false)
 const regenerateOpen = ref(false)
@@ -77,13 +80,18 @@ async function revoke() {
 
       <div class="flex items-center gap-2">
         <code class="min-w-0 flex-1 font-mono text-sm break-all select-all">
-          {{ key.key_plain ?? `${key.key_prefix}…` }}
+          {{ completeKey ?? `${key.key_prefix}…` }}
         </code>
-        <CopyButton :value="key.key_plain ?? key.key_prefix" label="Copy the public key" />
+        <CopyButton
+          v-if="completeKey"
+          :value="completeKey"
+          label="Copy the public key"
+          shape="default"
+        />
       </div>
 
-      <p v-if="!key.key_plain" class="text-caption text-muted-foreground">
-        This key was issued before the plaintext was stored, so only its prefix can be shown.
+      <p v-if="!completeKey" class="text-caption text-muted-foreground">
+        This key was issued before the whole value was stored, so only its prefix can be shown.
         Regenerate to make the full key available here and on the public router page.
       </p>
 
@@ -156,7 +164,7 @@ async function revoke() {
 
         <div class="bg-muted flex items-center gap-2 rounded-md p-3">
           <code class="min-w-0 flex-1 truncate font-mono text-sm">{{ revealedKey }}</code>
-          <CopyButton :value="revealedKey" label="Copy API key" />
+          <CopyButton :value="revealedKey" label="Copy API key" shape="default" />
         </div>
 
         <DialogFooter>

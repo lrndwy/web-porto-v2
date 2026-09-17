@@ -27,7 +27,7 @@ export default defineNuxtConfig({
           // Applies the stored theme before first paint so the toggle never
           // flashes the wrong surface. Kept inline and dependency-free.
           innerHTML:
-            "(function(){try{if(localStorage.getItem('wp-theme')==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})()",
+            "(function(){try{if(localStorage.getItem('wp-theme')!=='light'){document.documentElement.classList.add('dark')}}catch(e){}})()",
           tagPriority: 'critical',
         },
       ],

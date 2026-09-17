@@ -81,7 +81,7 @@ const elsewhere = [
             </p>
           </div>
 
-          <Button v-if="profile.email" as-child class="rounded-full active:scale-[0.98]">
+          <Button shape="pill" v-if="profile.email" as-child class="rounded-full active:scale-[0.98]">
             <a :href="`mailto:${profile.email}`" @click="trackEvent('contact_submit')">
               Get in touch
               <Icon name="ph:arrow-up-right" />
