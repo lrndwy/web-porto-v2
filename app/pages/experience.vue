@@ -41,7 +41,7 @@ const stats = computed(() => {
       </div>
     </dl>
 
-    <div v-if="experiences?.length" class="mt-14">
+    <div v-if="experiences?.length" class="mx-auto mt-14 max-w-5xl">
       <ExperienceTimeline :experiences="experiences" grouped />
     </div>
 

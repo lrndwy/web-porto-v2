@@ -182,7 +182,9 @@ const heroStats = computed(() => {
         </div>
       </dl>
 
-      <div class="mt-12">
+      <!-- Centered and width-capped: a full-bleed timeline leaves the right half
+           of a 1400px page empty when the descriptions are short. -->
+      <div class="mx-auto mt-12 max-w-5xl">
         <ExperienceTimeline :experiences="latestExperiences" />
       </div>
     </SectionShell>
