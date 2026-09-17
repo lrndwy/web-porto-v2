@@ -18,7 +18,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      link: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+      // The favicon comes from site_settings at runtime (app.vue); only the
+      // pre-hydration theme script is static.
       script: [
         {
           // Applies the stored theme before first paint so the toggle never
@@ -31,12 +32,12 @@ export default defineNuxtConfig({
     },
   },
 
-  shadcn: { prefix: '', componentDir: '@/components/ui' },
-
   // Components are addressed by their file name (`<AppNav>`, `<ProjectCard>`),
   // matching the plan. `ui/**` is excluded because shadcn-nuxt already
   // registers those explicitly by name.
   components: [{ path: '~/components', pathPrefix: false, ignore: ['ui/**'] }],
+
+  shadcn: { prefix: '', componentDir: '@/components/ui' },
 
   fonts: {
     families: [
@@ -76,17 +77,24 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/api/router': { cors: true },
-    '/admin/**': { ssr: false },
-    // ponytail: swr is disabled while the content phases are being built so a
-    // cached response cannot mask a change. Restore the plan's values
-    // (/, 300; /projects 600; /blog 600; /blog/** 600) in Phase 12.
-    // '/': { swr: 300 },
-    // '/projects': { swr: 600 },
-    // '/blog': { swr: 600 },
-    // '/blog/**': { swr: 600 },
+    '/admin/**': { ssr: false, headers: { 'x-frame-options': 'DENY' } },
+    '/': { swr: 300 },
+    '/projects': { swr: 600 },
+    '/blog': { swr: 600 },
+    '/blog/**': { swr: 600 },
+
+    // Baseline response headers for everything else.
+    '/**': {
+      headers: {
+        'x-content-type-options': 'nosniff',
+        'referrer-policy': 'strict-origin-when-cross-origin',
+      },
+    },
   },
 
   nitro: { compressPublicAssets: true },
 
   sitemap: { sources: ['/api/__sitemap__/urls'] },
+
+  robots: { disallow: ['/admin', '/api'] },
 })

@@ -1,33 +1,41 @@
-import type { NuxtApp } from '#app'
-
 /**
  * Public reads go through the anon client, so every visibility rule is enforced
  * by RLS rather than by route code. No public read endpoints exist except the
  * signed-document one, which the anon client cannot serve.
  *
- * Each loader is a `useAsyncData` with a stable key and payload reuse, so the
- * `swr` route rules can serve a cached payload without a second query.
+ * Each loader is a `useAsyncData` with a stable key: Nuxt reuses the payload
+ * value across hydration, which is what lets the `swr` route rules serve a
+ * cached response without a second query.
  */
-
-function payloadCache(nuxtApp: NuxtApp, key: string) {
-  return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key]
-}
-
 function loader<T>(key: string, fetcher: () => Promise<T>) {
-  return useAsyncData<T>(key, fetcher, {
-    getCachedData: (cacheKey) => payloadCache(useNuxtApp(), cacheKey) as T | undefined,
-  })
+  return useAsyncData<T>(key, fetcher)
 }
 
+/**
+ * The site name, logo, and meta defaults drive the chrome on every page.
+ *
+ * The value is mirrored into `useState`, which Nuxt serialises into the payload
+ * and restores during hydration. Reading it from `useAsyncData` alone leaves a
+ * window where the client has not resolved the value yet, which empties the
+ * header brand and the document title on first paint.
+ */
 export function useSiteSettings() {
-  return loader('site-settings', async () => {
+  const cached = useState<SiteSettingsRow | null>('site-settings-value', () => null)
+
+  const result = useAsyncData<SiteSettingsRow | null>('site-settings', async () => {
     const { data } = await useSupabaseClient()
       .from('site_settings')
       .select('*')
       .limit(1)
       .maybeSingle()
+    if (data) cached.value = data
     return data
   })
+
+  return {
+    ...result,
+    data: computed(() => result.data.value ?? cached.value),
+  }
 }
 
 export function useNavigation() {
