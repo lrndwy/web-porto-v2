@@ -28,6 +28,8 @@ export default defineNuxtConfig({
   icon: { mode: 'svg', serverBundle: { collections: ['ph'] } },
 
   supabase: {
+    // Single source of truth, importable from app/, server/, and shared/.
+    types: '~~/shared/types/database.types.ts',
     redirect: true,
     redirectOptions: {
       login: '/admin/login',
