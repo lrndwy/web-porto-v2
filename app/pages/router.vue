@@ -65,9 +65,9 @@ const percentUsed = computed(() => {
       </div>
 
       <div class="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <div class="flex flex-col gap-6">
+        <div class="flex min-w-0 flex-col gap-6">
           <!-- Public key -->
-          <div class="bg-card shadow-surface flex flex-col gap-3 rounded-xl border p-5">
+          <div class="bg-card shadow-surface flex min-w-0 flex-col gap-3 rounded-xl border p-5">
             <div class="flex items-start justify-between gap-3">
               <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
                 Public API key
@@ -87,7 +87,7 @@ const percentUsed = computed(() => {
           </div>
 
           <!-- Example -->
-          <div class="flex flex-col gap-3">
+          <div class="flex min-w-0 flex-col gap-3">
             <div class="flex items-center justify-between gap-3">
               <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
                 Example request
@@ -95,12 +95,12 @@ const percentUsed = computed(() => {
               <CopyButton :value="curlExample" label="Copy the curl example" />
             </div>
             <pre
-              class="border-border bg-muted/70 overflow-x-auto rounded-xl border p-5 font-mono text-sm leading-relaxed"
+              class="border-border bg-muted/70 w-full min-w-0 overflow-x-auto rounded-xl border p-5 font-mono text-sm leading-relaxed"
             >{{ curlExample }}</pre>
           </div>
         </div>
 
-        <div class="flex flex-col gap-6">
+        <div class="flex min-w-0 flex-col gap-6">
           <!-- Quota -->
           <div class="bg-card shadow-surface flex flex-col gap-4 rounded-xl border p-5">
             <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Usage</p>

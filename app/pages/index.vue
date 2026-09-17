@@ -4,7 +4,6 @@ const { data: experiences } = await useExperiences()
 const { data: socials } = await useSocials()
 const { data: projects } = await useFeaturedProjects()
 const { data: articles } = await useArticles({ limit: 3 })
-const { data: educations } = await useEducations()
 const { data: info } = await useAsyncData('router-info', () =>
   $fetch<RouterInfo>('/api/router/info'),
 )
@@ -13,17 +12,15 @@ useSeo()
 
 const { trackEvent } = useTrackEvent()
 
+/** A single low-opacity accent wash for the closing CTA panel. */
+const ctaWash = {
+  background: 'radial-gradient(ellipse 55% 90% at 100% 0%, var(--primary), transparent 62%)',
+}
+
 const featured = computed(() => projects.value?.find((project) => project.is_featured) ?? null)
 const rest = computed(() => projects.value?.filter((project) => project.id !== featured.value?.id) ?? [])
 const latestExperiences = computed(() => experiences.value?.slice(0, 3) ?? [])
 const currentRole = computed(() => experiences.value?.find((role) => role.is_current) ?? null)
-
-const aboutParagraphs = computed(() =>
-  (profile.value?.description ?? '')
-    .split(/\n{2,}/)
-    .map((part) => part.trim())
-    .filter(Boolean),
-)
 
 const careerStats = computed(() => {
   const roles = experiences.value ?? []
@@ -34,41 +31,64 @@ const careerStats = computed(() => {
     { label: 'Organisations', value: String(new Set(roles.map((role) => role.organization)).size) },
   ]
 })
-const quickFacts = computed(() => [
-  { label: 'Location', value: profile.value?.location },
-  { label: 'Focus', value: profile.value?.title },
-  { label: 'Experience', value: experiences.value?.length ? `${experiences.value.length} roles` : null },
-  { label: 'Education', value: educations.value?.length ? `${educations.value.length} programmes` : null },
-].filter((fact) => fact.value))
+
+/** The hero's metadata strip: facts that make the short hero feel complete. */
+const heroStats = computed(() => {
+  const roles = experiences.value ?? []
+  return [
+    { label: 'Based in', value: profile.value?.location },
+    { label: 'Roles held', value: roles.length ? String(roles.length) : null },
+    { label: 'Since', value: roles.map((role) => role.start_date).sort()[0]?.slice(0, 4) },
+  ].filter((stat): stat is { label: string; value: string } => !!stat.value)
+})
 </script>
 
 <template>
   <div>
-    <!-- Hero -->
-    <section class="min-h-[62dvh]">
-      <div class="mx-auto grid w-full max-w-[1400px] items-center gap-10 px-6 py-16 md:grid-cols-[1.35fr_1fr] md:py-20">
+    <!-- Hero: deliberately short. The metadata strip under the CTAs carries the
+         weight that a taller, emptier hero would have spent on whitespace. -->
+    <section class="border-border/70 border-b">
+      <div
+        class="mx-auto grid w-full max-w-[1400px] gap-10 px-6 pt-12 pb-12 md:grid-cols-[1.45fr_1fr] md:items-end md:gap-16 md:pt-16 md:pb-14"
+      >
         <RevealOnScroll>
-          <h1 class="text-title">
+          <p
+            class="border-border/70 bg-card/60 text-caption text-muted-foreground mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono tracking-[0.18em] uppercase backdrop-blur-sm"
+          >
+            <span class="bg-primary size-1.5 rounded-full" aria-hidden="true" />
+            Available for selected opportunities
+          </p>
+
+          <h1 class="text-display measure">
             <template v-if="profile?.name">Hi, I'm {{ profile.name }}.</template>
             <template v-else>Software, systems, and the web.</template>
           </h1>
+
           <p v-if="profile?.title" class="text-subtitle text-muted-foreground mt-3">
             {{ profile.title }}
           </p>
-          <p v-if="profile?.short_description" class="text-body measure mt-5">
+          <p v-if="profile?.short_description" class="text-body text-muted-foreground measure mt-4">
             {{ profile.short_description }}
           </p>
-
-          <div class="mt-6">
-            <StatusDot label="Available for selected opportunities" />
-          </div>
 
           <div class="mt-8 flex flex-wrap items-center gap-3">
             <MagneticCta to="/projects" label="View Projects" />
             <Button as-child variant="ghost" class="active:translate-y-px">
-              <NuxtLink to="/about">Read About Me</NuxtLink>
+              <NuxtLink to="/about">
+                Read About Me
+                <Icon name="ph:arrow-right" />
+              </NuxtLink>
             </Button>
           </div>
+
+          <dl v-if="heroStats.length" class="border-border/70 mt-10 grid max-w-xl grid-cols-3 gap-6 border-t pt-6">
+            <div v-for="stat in heroStats" :key="stat.label" class="flex flex-col gap-1">
+              <dt class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+                {{ stat.label }}
+              </dt>
+              <dd class="text-caption font-mono">{{ stat.value }}</dd>
+            </div>
+          </dl>
 
           <div v-if="socials?.length" class="mt-8">
             <SocialLinks :socials="socials" />
@@ -76,25 +96,32 @@ const quickFacts = computed(() => [
         </RevealOnScroll>
 
         <RevealOnScroll :delay="0.08">
-          <div class="relative mx-auto w-full max-w-sm">
+          <div class="relative w-full max-w-xs md:justify-self-end">
             <img
               v-if="profile?.avatar_url"
               :src="profile.avatar_url"
-              :alt="profile.name ? `${profile.name}` : ''"
-              width="480"
-              height="600"
-              class="border-border aspect-[4/5] w-full rounded-lg border object-cover"
+              :alt="profile.name ? `Portrait of ${profile.name}` : ''"
+              width="420"
+              height="525"
+              class="border-border aspect-[4/5] w-full rounded-xl border object-cover"
             >
             <div
               v-else
-              class="border-border bg-muted/60 relative aspect-[4/5] w-full overflow-hidden rounded-lg border"
+              class="border-border bg-muted/60 relative aspect-[4/5] w-full overflow-hidden rounded-xl border"
               aria-hidden="true"
             >
-              <div class="bg-chart-1/25 absolute inset-x-8 top-10 h-24 rounded-md" />
-              <div class="bg-chart-2/25 absolute inset-x-16 top-28 h-24 rounded-md" />
-              <div class="bg-chart-3/25 absolute inset-x-6 bottom-10 h-14 rounded-md" />
-              <div class="border-border absolute inset-4 rounded-md border border-dashed" />
+              <div class="bg-chart-1/25 absolute inset-x-8 top-10 h-20 rounded-md" />
+              <div class="bg-chart-2/25 absolute inset-x-14 top-24 h-20 rounded-md" />
+              <div class="bg-chart-3/25 absolute inset-x-6 bottom-10 h-12 rounded-md" />
+              <div class="border-border absolute inset-3 rounded-md border border-dashed" />
             </div>
+
+            <p
+              v-if="currentRole"
+              class="text-caption text-muted-foreground mt-3 text-right font-mono"
+            >
+              {{ currentRole.organization }} · {{ currentRole.title }}
+            </p>
           </div>
         </RevealOnScroll>
       </div>
@@ -158,80 +185,6 @@ const quickFacts = computed(() => [
       </div>
     </SectionShell>
 
-    <!-- About: an editorial intro rather than a paragraph in a column. The rail
-         carries the portrait and the facts so the prose can stay a single
-         comfortable measure. -->
-    <SectionShell v-if="profile" id="about">
-      <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-16">
-        <div class="flex flex-col gap-6">
-          <SectionHeading overline="About" title="About Me" />
-
-          <p v-if="profile.short_description" class="text-subtitle measure">
-            {{ profile.short_description }}
-          </p>
-
-          <div class="flex flex-col gap-4">
-            <p
-              v-for="(paragraph, index) in aboutParagraphs"
-              :key="index"
-              class="text-body text-muted-foreground measure"
-              :class="index === 0 ? 'text-foreground' : ''"
-            >
-              {{ paragraph }}
-            </p>
-            <p v-if="!aboutParagraphs.length && !profile.short_description" class="text-body text-muted-foreground measure">
-              Nothing published yet.
-            </p>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-3">
-            <Button as-child variant="outline" class="active:translate-y-px">
-              <NuxtLink to="/about">
-                Read the longer version
-                <Icon name="ph:arrow-right" />
-              </NuxtLink>
-            </Button>
-            <NuxtLink
-              v-if="profile.email"
-              :to="`mailto:${profile.email}`"
-              class="text-caption text-muted-foreground hover:text-foreground font-mono transition-colors duration-200"
-            >
-              {{ profile.email }}
-            </NuxtLink>
-          </div>
-        </div>
-
-        <aside class="flex flex-col gap-5 lg:sticky lg:top-24 lg:self-start">
-          <img
-            v-if="profile.avatar_url"
-            :src="profile.avatar_url"
-            :alt="`Portrait of ${profile.name}`"
-            width="480"
-            height="600"
-            loading="lazy"
-            class="border-border aspect-[4/5] w-full rounded-xl border object-cover"
-          >
-          <div
-            v-else
-            class="border-border bg-muted/50 relative aspect-[4/5] w-full overflow-hidden rounded-xl border"
-            aria-hidden="true"
-          >
-            <div class="bg-chart-1/25 absolute inset-x-5 top-7 h-16 rounded-md" />
-            <div class="bg-chart-2/25 absolute inset-x-10 top-20 h-16 rounded-md" />
-            <div class="bg-chart-3/25 absolute inset-x-3 bottom-7 h-10 rounded-md" />
-            <div class="border-border absolute inset-3 rounded-md border border-dashed" />
-          </div>
-
-          <dl v-if="quickFacts.length" class="divide-border border-border divide-y border-t">
-            <div v-for="fact in quickFacts" :key="fact.label" class="flex items-baseline justify-between gap-4 py-2.5">
-              <dt class="text-caption text-muted-foreground">{{ fact.label }}</dt>
-              <dd class="text-caption text-right font-mono">{{ fact.value }}</dd>
-            </div>
-          </dl>
-        </aside>
-      </div>
-    </SectionShell>
-
     <!-- Latest articles -->
     <SectionShell v-if="articles?.items.length" id="articles">
       <SectionHeading overline="Writing" title="Latest Articles" />
@@ -250,7 +203,6 @@ const quickFacts = computed(() => [
     <!-- AI Router -->
     <SectionShell v-if="info?.enabled" id="router">
       <SectionHeading
-        class="items-center text-center"
         overline="Infrastructure"
         title="AI Router"
         description="One endpoint, multiple AI providers, a quota the owner controls."
@@ -260,21 +212,61 @@ const quickFacts = computed(() => [
       </div>
     </SectionShell>
 
-    <!-- Contact -->
+    <!-- Contact: the page's closing CTA, on its own surface so it reads as an
+         invitation rather than one more section. -->
     <SectionShell v-if="profile" id="contact">
-      <SectionHeading overline="Contact" title="Let's build something." />
-      <div class="mt-8 flex flex-col gap-4">
-        <p class="text-body measure text-muted-foreground">
-          Have a project, an idea, or an opportunity? Email is the fastest way to reach me.
-        </p>
-        <div class="flex flex-wrap items-center gap-3">
-          <Button v-if="profile.email" as-child class="active:translate-y-px">
-            <a :href="`mailto:${profile.email}`" @click="trackEvent('contact_submit')">
-              <Icon name="ph:envelope" />
-              {{ profile.email }}
-            </a>
-          </Button>
-          <SocialLinks v-if="socials?.length" :socials="socials" />
+      <div class="border-border/70 bg-card shadow-surface rounded-3xl border p-1.5">
+        <div
+          class="border-border/60 relative overflow-hidden rounded-[calc(1.5rem-0.375rem)] border px-6 py-12 md:px-12 md:py-16"
+        >
+          <div class="pointer-events-none absolute inset-0 opacity-[0.10]" :style="ctaWash" aria-hidden="true" />
+
+          <div class="relative grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-end lg:gap-16">
+            <div class="flex flex-col gap-4">
+              <p
+                class="border-border/70 bg-background/70 text-caption text-muted-foreground inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 font-mono tracking-[0.18em] uppercase"
+              >
+                <span class="bg-primary size-1.5 rounded-full" aria-hidden="true" />
+                Contact
+              </p>
+              <h2 class="text-display measure">Let's build something.</h2>
+              <p class="text-body text-muted-foreground measure">
+                Have a project, an idea, or an opportunity? Email is the fastest way to reach me —
+                I read everything.
+              </p>
+            </div>
+
+            <div class="flex flex-col gap-4 lg:items-end">
+              <Button
+                v-if="profile.email"
+                as-child
+                size="lg"
+                class="rounded-full pr-1.5 pl-5 active:scale-[0.98]"
+              >
+                <a :href="`mailto:${profile.email}`" @click="trackEvent('contact_submit')">
+                  Send a message
+                  <span class="bg-primary-foreground/15 ml-2 flex size-7 items-center justify-center rounded-full">
+                    <Icon name="ph:arrow-up-right" class="size-4" />
+                  </span>
+                </a>
+              </Button>
+
+              <p v-if="profile.email" class="text-caption text-muted-foreground font-mono lg:text-right">
+                {{ profile.email }}
+              </p>
+
+              <Button as-child variant="outline" size="lg" class="rounded-full active:scale-[0.98]">
+                <NuxtLink to="/cv">
+                  <Icon name="ph:file-text" />
+                  Download CV
+                </NuxtLink>
+              </Button>
+
+              <div v-if="socials?.length" class="lg:pt-2">
+                <SocialLinks :socials="socials" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </SectionShell>

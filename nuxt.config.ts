@@ -1,5 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -78,10 +80,18 @@ export default defineNuxtConfig({
   routeRules: {
     '/api/router': { cors: true },
     '/admin/**': { ssr: false, headers: { 'x-frame-options': 'DENY' } },
-    '/': { swr: 300 },
-    '/projects': { swr: 600 },
-    '/blog': { swr: 600 },
-    '/blog/**': { swr: 600 },
+
+    // Caching is a production concern only. In development a cached SSR
+    // response hides every edit until the window expires, which looks exactly
+    // like a broken build.
+    ...(isProduction
+      ? {
+          '/': { swr: 300 },
+          '/projects': { swr: 600 },
+          '/blog': { swr: 600 },
+          '/blog/**': { swr: 600 },
+        }
+      : {}),
 
     // Baseline response headers for everything else.
     '/**': {

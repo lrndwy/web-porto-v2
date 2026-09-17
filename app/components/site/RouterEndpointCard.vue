@@ -16,87 +16,107 @@ const percentUsed = computed(() => {
 
 // The working key is published by design; the prefix is the fallback for keys
 // created before the plaintext column existed.
-const displayKey = computed(() => props.info.key ?? (props.info.key_prefix ? `${props.info.key_prefix}…` : null))
+const displayKey = computed(
+  () => props.info.key ?? (props.info.key_prefix ? `${props.info.key_prefix}…` : null),
+)
 const copyValue = computed(() => props.info.key ?? props.info.key_prefix ?? '')
 
-const stats = computed(() => [
-  { label: 'Models available', value: String(props.info.models.length) },
-  { label: 'Tokens used', value: formatNumber(props.info.quota.used) },
-  { label: 'Tokens remaining', value: formatNumber(props.info.quota.remaining) },
-])
+/**
+ * One restrained accent wash, kept inside the card. Everything else about the
+ * card stays quiet so the gradient is the only thing doing decorative work.
+ */
+const wash = {
+  background: 'radial-gradient(ellipse 70% 120% at 0% 0%, var(--primary), transparent 58%)',
+}
 </script>
 
 <template>
-  <div
-    class="bg-card shadow-surface flex flex-col rounded-xl border"
-    :class="props.wide ? 'gap-8 p-6 md:p-10' : 'gap-4 p-5'"
-  >
-    <template v-if="props.wide">
-      <div class="flex flex-col items-center gap-4 text-center">
-        <StatusDot label="Operational" />
-        <p class="text-base font-mono break-all md:text-lg">{{ props.info.endpoint }}</p>
-        <div class="flex items-center gap-2">
-          <CopyButton :value="props.info.endpoint" label="Copy endpoint URL" />
-          <span class="text-caption text-muted-foreground">Copy the endpoint</span>
-        </div>
-      </div>
+  <!-- Double bezel: a hairline shell around an inner core with concentric radii. -->
+  <div class="border-border/70 bg-muted/25 shadow-surface rounded-3xl border p-1.5">
+    <div
+      class="border-border/60 bg-card relative overflow-hidden rounded-[calc(1.5rem-0.375rem)] border"
+      :class="props.wide ? 'px-6 py-8 md:px-10 md:py-10' : 'p-5'"
+    >
+      <div class="pointer-events-none absolute inset-0 opacity-[0.11]" :style="wash" aria-hidden="true" />
 
-      <div class="divide-border border-border grid divide-y border-t md:grid-cols-3 md:divide-x md:divide-y-0">
-        <div class="flex flex-col items-center gap-2 px-4 py-6">
-          <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Public key</p>
-          <p v-if="displayKey" class="font-mono text-sm break-all">{{ displayKey }}</p>
-          <p v-else class="text-caption text-muted-foreground">No active key</p>
-          <CopyButton v-if="displayKey" :value="copyValue" label="Copy the public key" />
-        </div>
+      <div class="relative">
+        <template v-if="props.wide">
+          <div class="grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:gap-12">
+            <!-- Endpoint + key, left aligned -->
+            <div class="flex flex-col gap-5">
+              <div class="flex flex-col gap-1">
+                <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+                  Endpoint
+                </p>
+                <div class="flex items-start gap-2">
+                  <p class="text-base font-mono break-all md:text-lg">{{ props.info.endpoint }}</p>
+                  <CopyButton :value="props.info.endpoint" label="Copy endpoint URL" />
+                </div>
+              </div>
 
-        <div
-          v-for="stat in stats"
-          :key="stat.label"
-          class="flex flex-col items-center justify-center gap-1 px-4 py-6"
-        >
-          <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">{{ stat.label }}</p>
-          <p class="text-subtitle font-mono">{{ stat.value }}</p>
-        </div>
-      </div>
+              <div v-if="displayKey" class="flex flex-col gap-1">
+                <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+                  Public key
+                </p>
+                <div class="flex items-start gap-2">
+                  <p class="text-caption font-mono break-all select-all">{{ displayKey }}</p>
+                  <CopyButton :value="copyValue" label="Copy the public key" />
+                </div>
+              </div>
+            </div>
 
-      <div class="flex flex-col items-center gap-3">
-        <Progress :model-value="percentUsed" class="w-full max-w-md" />
-        <p class="text-caption text-muted-foreground font-mono">
-          {{ formatNumber(props.info.quota.used) }} / {{ formatNumber(props.info.quota.limit) }} tokens
-          this month
-        </p>
-        <Button as-child class="active:translate-y-px">
-          <NuxtLink to="/router">
-            Open the router
-            <Icon name="ph:arrow-right" />
-          </NuxtLink>
-        </Button>
-      </div>
-    </template>
+            <!-- Status + quota, right -->
+            <div class="flex flex-col gap-4 lg:border-border/60 lg:border-l lg:pl-10">
+              <StatusDot label="Operational" />
 
-    <template v-else>
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex min-w-0 flex-col gap-1">
-          <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Endpoint</p>
-          <p class="truncate font-mono text-sm">{{ props.info.endpoint }}</p>
-        </div>
-        <CopyButton :value="props.info.endpoint" label="Copy endpoint URL" />
-      </div>
+              <div class="flex flex-col gap-2">
+                <div class="flex items-baseline justify-between gap-4">
+                  <span class="text-caption text-muted-foreground">Models</span>
+                  <span class="font-mono text-sm">{{ props.info.models.length }}</span>
+                </div>
+                <div class="flex items-baseline justify-between gap-4">
+                  <span class="text-caption text-muted-foreground">Tokens remaining</span>
+                  <span class="font-mono text-sm">{{ formatNumber(props.info.quota.remaining) }}</span>
+                </div>
+              </div>
 
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <StatusDot label="Operational" />
-        <span class="text-caption text-muted-foreground font-mono">
-          {{ props.info.models.length }} models available
-        </span>
-      </div>
+              <Progress :model-value="percentUsed" />
 
-      <div class="flex flex-col gap-2">
-        <Progress :model-value="percentUsed" />
-        <p class="text-caption text-muted-foreground font-mono">
-          {{ formatNumber(props.info.quota.used) }} / {{ formatNumber(props.info.quota.limit) }} tokens
-          · {{ formatNumber(props.info.quota.remaining) }} remaining
-        </p>
+              <Button as-child variant="outline" class="w-fit rounded-full active:scale-[0.98]">
+                <NuxtLink to="/router">
+                  Open the router
+                  <Icon name="ph:arrow-right" />
+                </NuxtLink>
+              </Button>
+            </div>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex min-w-0 flex-col gap-1">
+              <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Endpoint</p>
+              <p class="truncate font-mono text-sm">{{ props.info.endpoint }}</p>
+            </div>
+            <CopyButton :value="props.info.endpoint" label="Copy endpoint URL" />
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <StatusDot label="Operational" />
+            <span class="text-caption text-muted-foreground font-mono">
+              {{ props.info.models.length }} models available
+            </span>
+          </div>
+
+          <div class="mt-4 flex flex-col gap-2">
+            <Progress :model-value="percentUsed" />
+            <p class="text-caption text-muted-foreground font-mono">
+              {{ formatNumber(props.info.quota.used) }} / {{ formatNumber(props.info.quota.limit) }} tokens
+              · {{ formatNumber(props.info.quota.remaining) }} remaining
+            </p>
+          </div>
+        </template>
       </div>
-    </template>
+    </div>
   </div>
 </template>
