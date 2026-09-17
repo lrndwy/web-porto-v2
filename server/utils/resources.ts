@@ -106,10 +106,18 @@ export function sortColumnsFor(def: ResourceDef): string[] {
 /**
  * Maps a Postgres constraint failure onto an HTTP status. Without this every
  * constraint violation would surface as an opaque 500.
+ *
+ * Note the two foreign-key states: `23503` is a missing reference, while
+ * `23001` is an `on delete restrict` refusal. They need different statuses, and
+ * conflating them turns "delete the children first" into a server error.
  */
 export function throwDbError(error: { code?: string; message: string }): never {
   const statusCode =
-    error.code === '23505' ? 409 : error.code === '23514' || error.code === '23503' ? 422 : 500
+    error.code === '23505' || error.code === '23001'
+      ? 409
+      : error.code === '23514' || error.code === '23503'
+        ? 422
+        : 500
 
   throw createError({ statusCode, statusMessage: error.message })
 }

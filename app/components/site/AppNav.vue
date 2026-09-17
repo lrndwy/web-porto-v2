@@ -21,7 +21,11 @@ const logoUrl = computed(() => settings.value?.logo_url ?? null)
 <template>
   <header
     class="sticky top-0 z-40 border-b transition-colors duration-200"
-    :class="scrolled ? 'bg-background/80 border-border backdrop-blur' : 'border-transparent'"
+    :class="
+      scrolled
+        ? 'bg-background/75 border-border/70 backdrop-blur-md shadow-[inset_0_-1px_0_oklch(1_0_0/0.06)]'
+        : 'border-transparent'
+    "
   >
     <div class="mx-auto flex h-16 w-full max-w-[1400px] items-center gap-4 px-6">
       <NuxtLink to="/" class="flex items-center gap-2.5 shrink-0">

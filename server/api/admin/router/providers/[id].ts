@@ -13,19 +13,21 @@ export default defineEventHandler(async (event) => {
   const client = untypedClient(event)
 
   if (event.method === 'DELETE') {
-    // Deleting a provider that models or logs point at would orphan them, so the
-    // Owner is told to deactivate instead.
-    const [{ count: modelCount }, { count: logCount }] = await Promise.all([
-      client.from('ai_models').select('id', { count: 'exact', head: true }).eq('provider_id', id.data),
-      client.from('ai_usage_logs').select('id', { count: 'exact', head: true }).eq('provider_id', id.data),
-    ])
+    // Only models block a delete, and they do so at the database level too
+    // (`ai_models.provider_id` is `on delete restrict`): removing a provider
+    // must never silently delete the models configured against it. Usage logs
+    // are `on delete set null` and keep their history either way.
+    const { count: modelCount } = await client
+      .from('ai_models')
+      .select('id', { count: 'exact', head: true })
+      .eq('provider_id', id.data)
 
-    if (modelCount || logCount) {
+    if (modelCount) {
       throw createError({
         statusCode: 409,
-        statusMessage: modelCount
-          ? `${modelCount} model(s) still use this provider. Deactivate it instead.`
-          : `${logCount} usage log(s) reference this provider. Deactivate it instead.`,
+        statusMessage: `${modelCount} model${modelCount === 1 ? '' : 's'} still use this provider. Delete ${
+          modelCount === 1 ? 'it' : 'them'
+        } first, or deactivate the provider instead.`,
       })
     }
 

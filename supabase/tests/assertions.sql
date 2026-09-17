@@ -228,4 +228,53 @@ begin
   if n <> 1 then raise exception 'anon listed % storage objects, expected 1', n; end if;
 end $$;
 
+-- 15. Deleting a model that usage logs reference succeeds, and the logs keep
+--     their history with a nulled reference. This is what makes a model that has
+--     ever served a request removable from the dashboard.
+do $$
+declare pid uuid; mid uuid; nulled int;
+begin
+  insert into public.ai_providers (name, base_url, is_active)
+    values ('Deletable', 'https://example.test/v1', true) returning id into pid;
+  insert into public.ai_models (provider_id, model_name, display_name, is_active)
+    values (pid, 'm1', 'm1', true) returning id into mid;
+  insert into public.ai_usage_logs (provider_id, model_id, request_id, status_code)
+    values (pid, mid, 'req-delete', 200);
+
+  delete from public.ai_models where id = mid;
+
+  select count(*) into nulled from public.ai_usage_logs
+   where request_id = 'req-delete' and model_id is null;
+  if nulled <> 1 then
+    raise exception 'deleting a model did not null its usage log reference';
+  end if;
+
+  delete from public.ai_providers where id = pid;
+  delete from public.ai_usage_logs where request_id = 'req-delete';
+end $$;
+
+-- 16. A provider that still has models cannot be deleted; the API surfaces this
+--     as a 409 rather than letting the database raise an opaque error.
+do $$
+declare pid uuid; blocked boolean := false;
+begin
+  insert into public.ai_providers (name, base_url, is_active)
+    values ('Protected', 'https://example.test/v1', true) returning id into pid;
+  insert into public.ai_models (provider_id, model_name, display_name, is_active)
+    values (pid, 'm2', 'm2', true);
+
+  begin
+    delete from public.ai_providers where id = pid;
+  exception when restrict_violation or foreign_key_violation then
+    blocked := true;
+  end;
+
+  if not blocked then
+    raise exception 'a provider with models was deleted without an error';
+  end if;
+
+  delete from public.ai_models where provider_id = pid;
+  delete from public.ai_providers where id = pid;
+end $$;
+
 select 'all schema assertions passed' as result;

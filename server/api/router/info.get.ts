@@ -11,9 +11,11 @@ export default defineEventHandler(async (event) => {
     client.from('ai_router_settings').select('*').limit(1).maybeSingle(),
     client.from('ai_models').select('display_name, provider_id').eq('is_active', true),
     client.from('ai_providers').select('id, name').eq('is_active', true),
+    // `*` rather than a column list: `key_plain` arrives with a later migration
+    // and naming it would break this public endpoint until it is applied.
     client
       .from('ai_api_keys')
-      .select('key_prefix')
+      .select('*')
       .eq('is_active', true)
       .is('revoked_at', null)
       .order('created_at', { ascending: false })
@@ -55,10 +57,15 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const base = String(config.public.siteUrl || '').replace(/\/$/, '')
 
+  const activeKey: { key_prefix: string; key_plain: string | null } | null = keyResult.data
+
   return {
     enabled: settings?.is_enabled === true,
     endpoint: `${base}/api/router`,
-    key_prefix: keyResult.data?.key_prefix ?? null,
+    key_prefix: activeKey?.key_prefix ?? null,
+    // Published on purpose: `/router` is a demo endpoint, so visitors need a
+    // key that actually works. `key_hash` remains the validation path.
+    key: activeKey?.key_plain ?? null,
     models: availableModels,
     quota: { limit, used, remaining: Math.max(0, limit - used) },
   }

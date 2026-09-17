@@ -17,6 +17,8 @@ export interface RouterInfo {
   enabled: boolean
   endpoint: string
   key_prefix: string | null
+  /** The working public key. Published by design; null for pre-migration keys. */
+  key: string | null
   models: { display_name: string; provider_name: string }[]
   quota: { limit: number; used: number; remaining: number }
 }

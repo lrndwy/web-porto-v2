@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { formatNumber } from '#shared/utils/format'
 const { data: info, pending } = await useAsyncData('router-page-info', () =>
   $fetch<RouterInfo>('/api/router/info'),
 )
@@ -9,9 +8,17 @@ useSeo({
   description: 'One endpoint, multiple AI providers, with an owner-controlled quota.',
 })
 
+// The working key is published by design: the router is a demo endpoint, so a
+// visitor needs a key that actually works. Keys created before the plaintext
+// column existed fall back to their prefix.
+const displayKey = computed(
+  () => info.value?.key ?? (info.value?.key_prefix ? `${info.value.key_prefix}…` : null),
+)
+const copyKey = computed(() => info.value?.key ?? info.value?.key_prefix ?? '')
+
 const curlExample = computed(
   () => `curl ${info.value?.endpoint ?? 'https://example.com/api/router'} \\
-  -H "Authorization: Bearer ${info.value?.key_prefix ?? 'pk_portfolio_xxx'}..." \\
+  -H "Authorization: Bearer ${info.value?.key ?? `${info.value?.key_prefix ?? 'pk_portfolio_xxx'}...`}" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "${info.value?.models[0]?.display_name ?? 'model-name'}",
@@ -29,88 +36,119 @@ const percentUsed = computed(() => {
   <SectionShell id="router">
     <div v-if="pending" class="flex flex-col gap-4">
       <Skeleton class="h-8 w-48" />
-      <Skeleton class="h-40 w-full max-w-xl" />
+      <Skeleton class="h-40 w-full" />
     </div>
 
     <template v-else-if="info?.enabled">
-      <SectionHeading
-        overline="Infrastructure"
-        title="AI Router"
-        description="One endpoint. Multiple AI providers. A quota the owner controls."
-      />
-
-      <div class="mt-6">
+      <div class="flex flex-col gap-3">
+        <SectionHeading
+          overline="Infrastructure"
+          title="One endpoint. Multiple AI providers."
+        />
         <StatusDot label="Operational" />
       </div>
 
-      <div class="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <!-- Endpoint bar: the single thing a visitor needs first. -->
+      <div
+        class="bg-card shadow-surface mt-10 flex flex-col gap-4 rounded-xl border p-5 md:flex-row md:items-center md:justify-between md:gap-8 md:p-6"
+      >
+        <div class="flex min-w-0 flex-col gap-1">
+          <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Endpoint</p>
+          <p class="font-mono text-base break-all md:text-lg">{{ info.endpoint }}</p>
+        </div>
+        <Button as-child variant="outline" class="shrink-0 self-start active:translate-y-px md:self-auto">
+          <a :href="info.endpoint" target="_blank" rel="noopener noreferrer">
+            <Icon name="ph:arrow-up-right" />
+            Open endpoint
+          </a>
+        </Button>
+      </div>
+
+      <div class="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div class="flex flex-col gap-6">
-          <div class="bg-card shadow-surface flex flex-col gap-4 rounded-lg border p-5">
+          <!-- Public key -->
+          <div class="bg-card shadow-surface flex flex-col gap-3 rounded-xl border p-5">
             <div class="flex items-start justify-between gap-3">
-              <div class="flex min-w-0 flex-col gap-1">
-                <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Endpoint</p>
-                <p class="truncate font-mono text-sm">{{ info.endpoint }}</p>
-              </div>
-              <CopyButton :value="info.endpoint" label="Copy endpoint URL" />
+              <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+                Public API key
+              </p>
+              <CopyButton v-if="displayKey" :value="copyKey" label="Copy the public key" />
             </div>
 
-            <div v-if="info.key_prefix" class="flex items-start justify-between gap-3">
-              <div class="flex min-w-0 flex-col gap-1">
-                <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Public key</p>
-                <p class="truncate font-mono text-sm">{{ info.key_prefix }}…</p>
-              </div>
-              <CopyButton :value="info.key_prefix" label="Copy key prefix" />
-            </div>
-          </div>
+            <p v-if="displayKey" class="font-mono text-sm break-all select-all">{{ displayKey }}</p>
+            <p v-else class="text-caption text-muted-foreground">
+              No active key. The owner can generate one in the dashboard.
+            </p>
 
-          <div class="bg-card shadow-surface flex flex-col gap-3 rounded-lg border p-5">
-            <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Usage</p>
-            <Progress :model-value="percentUsed" />
-            <p class="text-caption text-muted-foreground font-mono">
-              {{ formatNumber(info.quota.used) }} / {{ formatNumber(info.quota.limit) }} tokens ·
-              {{ formatNumber(info.quota.remaining) }} remaining
+            <p class="text-caption text-muted-foreground">
+              This key is meant to be shared — it identifies this portfolio, not an upstream account.
+              Provider secrets never leave the server.
             </p>
           </div>
 
+          <!-- Example -->
           <div class="flex flex-col gap-3">
-            <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Example</p>
-            <pre class="border-border bg-muted overflow-x-auto rounded-lg border p-4 font-mono text-sm">{{ curlExample }}</pre>
-            <CopyButton :value="curlExample" label="Copy the curl example" class="self-start" />
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+                Example request
+              </p>
+              <CopyButton :value="curlExample" label="Copy the curl example" />
+            </div>
+            <pre
+              class="border-border bg-muted/70 overflow-x-auto rounded-xl border p-5 font-mono text-sm leading-relaxed"
+            >{{ curlExample }}</pre>
           </div>
         </div>
 
-        <div class="flex flex-col gap-4">
-          <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Available models</p>
-          <ul class="divide-border divide-y">
-            <li
-              v-for="model in info.models"
-              :key="model.display_name"
-              class="flex items-center justify-between gap-4 py-3"
-            >
-              <div class="flex flex-col">
-                <span class="font-mono text-sm">{{ model.display_name }}</span>
-                <span class="text-caption text-muted-foreground">{{ model.provider_name }}</span>
+        <div class="flex flex-col gap-6">
+          <!-- Quota -->
+          <div class="bg-card shadow-surface flex flex-col gap-4 rounded-xl border p-5">
+            <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Usage</p>
+            <Progress :model-value="percentUsed" />
+            <dl class="divide-border divide-y">
+              <div class="flex items-baseline justify-between gap-4 py-2">
+                <dt class="text-caption text-muted-foreground">Used</dt>
+                <dd class="font-mono text-sm">{{ formatNumber(info.quota.used) }}</dd>
               </div>
-              <StatusDot label="Available" />
-            </li>
-          </ul>
+              <div class="flex items-baseline justify-between gap-4 py-2">
+                <dt class="text-caption text-muted-foreground">Limit</dt>
+                <dd class="font-mono text-sm">{{ formatNumber(info.quota.limit) }}</dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-4 py-2">
+                <dt class="text-caption text-muted-foreground">Remaining</dt>
+                <dd class="font-mono text-sm">{{ formatNumber(info.quota.remaining) }}</dd>
+              </div>
+            </dl>
+          </div>
 
-          <p v-if="!info.models.length" class="text-body text-muted-foreground">
-            No models are available right now.
-          </p>
+          <!-- Models -->
+          <div class="bg-card shadow-surface flex flex-col gap-3 rounded-xl border p-5">
+            <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+              Available models
+            </p>
+            <ul v-if="info.models.length" class="divide-border divide-y">
+              <li
+                v-for="model in info.models"
+                :key="model.display_name"
+                class="flex items-center justify-between gap-4 py-3"
+              >
+                <div class="flex min-w-0 flex-col">
+                  <span class="truncate font-mono text-sm">{{ model.display_name }}</span>
+                  <span class="text-caption text-muted-foreground">{{ model.provider_name }}</span>
+                </div>
+                <StatusDot />
+              </li>
+            </ul>
+            <p v-else class="text-caption text-muted-foreground">No models are available right now.</p>
+          </div>
         </div>
       </div>
 
       <div class="text-caption text-muted-foreground measure mt-12 flex flex-col gap-2">
         <p>
-          The public key above is meant to be shareable: it identifies this portfolio, not an
-          upstream account. Provider secrets never leave the server and are never returned by any
-          API.
-        </p>
-        <p>
-          Requests are accounted per key against the owner's monthly token quota and per-minute,
-          hourly, and daily request limits. Streaming responses are buffered before they are
-          returned.
+          Requests are counted per key against the owner's monthly token quota and the per-minute,
+          hourly, and daily request limits. Responses are buffered before they are returned, so
+          streaming is not offered.
         </p>
       </div>
     </template>

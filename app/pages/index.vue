@@ -3,7 +3,7 @@ const { data: profile } = await useProfile()
 const { data: experiences } = await useExperiences()
 const { data: socials } = await useSocials()
 const { data: projects } = await useFeaturedProjects()
-const { data: articles } = await useArticles(3)
+const { data: articles } = await useArticles({ limit: 3 })
 const { data: educations } = await useEducations()
 const { data: info } = await useAsyncData('router-info', () =>
   $fetch<RouterInfo>('/api/router/info'),
@@ -16,6 +16,24 @@ const { trackEvent } = useTrackEvent()
 const featured = computed(() => projects.value?.find((project) => project.is_featured) ?? null)
 const rest = computed(() => projects.value?.filter((project) => project.id !== featured.value?.id) ?? [])
 const latestExperiences = computed(() => experiences.value?.slice(0, 3) ?? [])
+const currentRole = computed(() => experiences.value?.find((role) => role.is_current) ?? null)
+
+const aboutParagraphs = computed(() =>
+  (profile.value?.description ?? '')
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean),
+)
+
+const careerStats = computed(() => {
+  const roles = experiences.value ?? []
+  const firstStart = roles.map((role) => role.start_date).sort()[0]?.slice(0, 4)
+  return [
+    { label: 'Since', value: firstStart ?? '—' },
+    { label: 'Roles held', value: String(roles.length) },
+    { label: 'Organisations', value: String(new Set(roles.map((role) => role.organization)).size) },
+  ]
+})
 const quickFacts = computed(() => [
   { label: 'Location', value: profile.value?.location },
   { label: 'Focus', value: profile.value?.title },
@@ -109,34 +127,108 @@ const quickFacts = computed(() => [
       </div>
     </SectionShell>
 
-    <!-- Experience -->
-    <SectionShell v-if="latestExperiences.length" id="experience">
-      <SectionHeading overline="Career" title="Experience" />
-      <div class="mt-10">
-        <ExperienceTimeline :experiences="latestExperiences" />
+    <!-- Experience: a stat rail beside the timeline, so the section reads as a
+         career summary rather than a short list floating in whitespace. -->
+    <SectionShell v-if="experiences?.length" id="experience">
+      <div class="grid gap-12 lg:grid-cols-[minmax(0,19rem)_1fr] lg:gap-16">
+        <div class="flex flex-col gap-8 lg:sticky lg:top-24 lg:self-start">
+          <SectionHeading overline="Career" title="Experience" />
+
+          <dl class="divide-border border-border divide-y border-t">
+            <div v-for="stat in careerStats" :key="stat.label" class="flex items-baseline justify-between gap-4 py-3">
+              <dt class="text-caption text-muted-foreground">{{ stat.label }}</dt>
+              <dd class="text-right font-mono text-sm">{{ stat.value }}</dd>
+            </div>
+          </dl>
+
+          <div v-if="currentRole" class="border-border bg-card/60 flex flex-col gap-1 rounded-lg border p-4">
+            <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Currently</p>
+            <p class="text-subtitle">{{ currentRole.title }}</p>
+            <p class="text-caption text-muted-foreground">{{ currentRole.organization }}</p>
+          </div>
+
+          <Button as-child variant="outline" class="self-start active:translate-y-px">
+            <NuxtLink to="/experience">Full history</NuxtLink>
+          </Button>
+        </div>
+
+        <div>
+          <ExperienceTimeline :experiences="latestExperiences" />
+        </div>
       </div>
     </SectionShell>
 
-    <!-- About -->
+    <!-- About: an editorial intro rather than a paragraph in a column. The rail
+         carries the portrait and the facts so the prose can stay a single
+         comfortable measure. -->
     <SectionShell v-if="profile" id="about">
-      <SectionHeading overline="About" title="About Me" />
-      <div class="mt-10 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
-        <div class="text-body measure flex flex-col gap-4">
-          <p v-if="profile.description">{{ profile.description }}</p>
-          <p v-else class="text-muted-foreground">Nothing published yet.</p>
+      <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-16">
+        <div class="flex flex-col gap-6">
+          <SectionHeading overline="About" title="About Me" />
+
+          <p v-if="profile.short_description" class="text-subtitle measure">
+            {{ profile.short_description }}
+          </p>
+
+          <div class="flex flex-col gap-4">
+            <p
+              v-for="(paragraph, index) in aboutParagraphs"
+              :key="index"
+              class="text-body text-muted-foreground measure"
+              :class="index === 0 ? 'text-foreground' : ''"
+            >
+              {{ paragraph }}
+            </p>
+            <p v-if="!aboutParagraphs.length && !profile.short_description" class="text-body text-muted-foreground measure">
+              Nothing published yet.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <Button as-child variant="outline" class="active:translate-y-px">
+              <NuxtLink to="/about">
+                Read the longer version
+                <Icon name="ph:arrow-right" />
+              </NuxtLink>
+            </Button>
+            <NuxtLink
+              v-if="profile.email"
+              :to="`mailto:${profile.email}`"
+              class="text-caption text-muted-foreground hover:text-foreground font-mono transition-colors duration-200"
+            >
+              {{ profile.email }}
+            </NuxtLink>
+          </div>
         </div>
 
-        <div v-if="quickFacts.length" class="border-t lg:border-t-0 lg:border-l lg:pl-8">
-          <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
-            Quick Facts
-          </p>
-          <dl class="divide-border mt-2 divide-y">
-            <div v-for="fact in quickFacts" :key="fact.label" class="flex justify-between gap-4 py-3">
+        <aside class="flex flex-col gap-5 lg:sticky lg:top-24 lg:self-start">
+          <img
+            v-if="profile.avatar_url"
+            :src="profile.avatar_url"
+            :alt="`Portrait of ${profile.name}`"
+            width="480"
+            height="600"
+            loading="lazy"
+            class="border-border aspect-[4/5] w-full rounded-xl border object-cover"
+          >
+          <div
+            v-else
+            class="border-border bg-muted/50 relative aspect-[4/5] w-full overflow-hidden rounded-xl border"
+            aria-hidden="true"
+          >
+            <div class="bg-chart-1/25 absolute inset-x-5 top-7 h-16 rounded-md" />
+            <div class="bg-chart-2/25 absolute inset-x-10 top-20 h-16 rounded-md" />
+            <div class="bg-chart-3/25 absolute inset-x-3 bottom-7 h-10 rounded-md" />
+            <div class="border-border absolute inset-3 rounded-md border border-dashed" />
+          </div>
+
+          <dl v-if="quickFacts.length" class="divide-border border-border divide-y border-t">
+            <div v-for="fact in quickFacts" :key="fact.label" class="flex items-baseline justify-between gap-4 py-2.5">
               <dt class="text-caption text-muted-foreground">{{ fact.label }}</dt>
-              <dd class="text-caption text-right">{{ fact.value }}</dd>
+              <dd class="text-caption text-right font-mono">{{ fact.value }}</dd>
             </div>
           </dl>
-        </div>
+        </aside>
       </div>
     </SectionShell>
 
@@ -158,12 +250,13 @@ const quickFacts = computed(() => [
     <!-- AI Router -->
     <SectionShell v-if="info?.enabled" id="router">
       <SectionHeading
+        class="items-center text-center"
         overline="Infrastructure"
         title="AI Router"
         description="One endpoint, multiple AI providers, a quota the owner controls."
       />
-      <div class="mt-10 max-w-xl">
-        <RouterEndpointCard :info="info" condensed />
+      <div class="mt-10">
+        <RouterEndpointCard :info="info" wide />
       </div>
     </SectionShell>
 

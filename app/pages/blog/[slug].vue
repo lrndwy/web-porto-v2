@@ -17,7 +17,10 @@ useSeo({
 })
 
 const { trackEvent } = useTrackEvent()
-const { data: related } = await useArticles(3, 1, post.value.blog_categories?.slug)
+const { data: related } = await useArticles({
+  limit: 3,
+  category: () => post.value?.blog_categories?.slug ?? null,
+})
 const otherArticles = computed(() =>
   (related.value?.items ?? []).filter((item) => item.slug !== post.value?.slug).slice(0, 3),
 )

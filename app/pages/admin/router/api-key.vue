@@ -7,6 +7,7 @@ definePageMeta({ layout: 'admin', title: 'API Key' })
 interface ApiKeyRow {
   id: string
   key_prefix: string
+  key_plain: string | null
   label: string | null
   is_active: boolean
   last_used_at: string | null
@@ -66,14 +67,25 @@ async function revoke() {
 
     <section v-if="key" class="bg-card shadow-surface flex flex-col gap-5 rounded-lg border p-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-col gap-1">
-          <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Key prefix</p>
-          <p class="font-mono">{{ key.key_prefix }}…</p>
-        </div>
+        <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+          Public key
+        </p>
         <Badge :variant="key.is_active ? 'default' : 'outline'">
           {{ key.is_active ? 'Active' : 'Revoked' }}
         </Badge>
       </div>
+
+      <div class="flex items-center gap-2">
+        <code class="min-w-0 flex-1 font-mono text-sm break-all select-all">
+          {{ key.key_plain ?? `${key.key_prefix}…` }}
+        </code>
+        <CopyButton :value="key.key_plain ?? key.key_prefix" label="Copy the public key" />
+      </div>
+
+      <p v-if="!key.key_plain" class="text-caption text-muted-foreground">
+        This key was issued before the plaintext was stored, so only its prefix can be shown.
+        Regenerate to make the full key available here and on the public router page.
+      </p>
 
       <dl class="divide-border grid gap-x-8 divide-y md:grid-cols-2 md:divide-y-0">
         <div class="flex items-center justify-between gap-4 py-3">
@@ -87,7 +99,8 @@ async function revoke() {
       </dl>
 
       <p class="text-caption text-muted-foreground">
-        The full key is only shown once, when it is generated. If it is lost, regenerate.
+        This key is published on <span class="font-mono">/router</span> so visitors can call the
+        endpoint. It is bounded by the rate limits and the monthly token quota, not by secrecy.
       </p>
 
       <div class="flex flex-wrap items-center gap-2">

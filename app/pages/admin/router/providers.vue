@@ -77,10 +77,24 @@ async function save() {
   }
 }
 
+/**
+ * Nuxt types `$fetch` against its generated route map. For a URL with a dynamic
+ * segment followed by a static one, TypeScript expands that entire map and
+ * gives up with "excessive stack depth". This is the one call with that shape,
+ * so it takes the untyped overload instead; the result is still bound to
+ * `TestOutcome`, so the shape is checked at the point of use.
+ */
+type TestOutcome = { ok: boolean; status: number; modelCount?: number; error?: string }
+const fetchTest = $fetch as unknown as (
+  url: string,
+  options: { method: 'POST' },
+) => Promise<TestOutcome>
+
 async function test(id: string) {
   testing.value = id
   try {
-    testResult.value[id] = await $fetch(`/api/admin/router/providers/${id}/test`, { method: 'POST' })
+    const endpoint: string = `/api/admin/router/providers/${id}/test`
+    testResult.value[id] = await fetchTest(endpoint, { method: 'POST' })
   } catch (error) {
     toast.error(errorMessage(error, 'The connection test failed.'))
   } finally {

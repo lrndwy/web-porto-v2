@@ -11,18 +11,10 @@ export default defineEventHandler(async (event) => {
   const client = untypedClient(event)
 
   if (event.method === 'DELETE') {
-    const { count } = await client
-      .from('ai_usage_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('model_id', id.data)
-
-    if (count) {
-      throw createError({
-        statusCode: 409,
-        statusMessage: `${count} usage log(s) reference this model. Deactivate it instead.`,
-      })
-    }
-
+    // Usage logs keep their history: `ai_usage_logs.model_id` is
+    // `on delete set null`, so deleting a model nulls the reference rather than
+    // destroying the audit trail. Refusing here would make a model that has
+    // ever served a request impossible to remove.
     const { data, error } = await client
       .from('ai_models')
       .delete()

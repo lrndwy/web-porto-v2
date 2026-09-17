@@ -135,10 +135,33 @@ export function useFeaturedProjects() {
   })
 }
 
-export function useArticles(limit = 3, page = 1, categorySlug?: string) {
-  const key = `articles-${limit}-${page}-${categorySlug ?? 'all'}`
-  return loader(key, async () => {
+export interface ArticleQuery {
+  limit?: number
+  page?: () => number
+  category?: () => string | null
+  search?: () => string | null
+}
+
+/**
+ * Article list with reactive filters.
+ *
+ * The key is a computed rather than a fixed string, so changing the page, the
+ * category, or the search term re-queries automatically instead of returning
+ * the result captured at setup.
+ */
+export function useArticles(query: ArticleQuery = {}) {
+  const limit = query.limit ?? 3
+  const key = computed(
+    () =>
+      `articles-${limit}-${query.page?.() ?? 1}-${query.category?.() ?? 'all'}-${query.search?.() ?? ''}`,
+  )
+
+  return useAsyncData(key, async () => {
     const client = useSupabaseClient()
+    const page = query.page?.() ?? 1
+    const category = query.category?.() ?? null
+    const term = escapeLikePattern(query.search?.() ?? '')
+
     let request = client
       .from('blog_posts')
       .select('*, blog_categories(name, slug)', { count: 'exact' })
@@ -147,7 +170,8 @@ export function useArticles(limit = 3, page = 1, categorySlug?: string) {
       .order('published_at', { ascending: false })
       .range((page - 1) * limit, page * limit - 1)
 
-    if (categorySlug) request = request.eq('blog_categories.slug', categorySlug)
+    if (category) request = request.eq('blog_categories.slug', category)
+    if (term) request = request.or(`title.ilike.%${term}%,excerpt.ilike.%${term}%`)
 
     const { data, count } = await request
     return { items: data ?? [], total: count ?? 0 }
