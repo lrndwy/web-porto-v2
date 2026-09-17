@@ -17,3 +17,27 @@ export function jwtSubject(claims: unknown): string | undefined {
   const sub = claims.sub
   return typeof sub === 'string' ? sub : undefined
 }
+
+/**
+ * A human-readable message from a thrown error, preferring the server's
+ * `statusMessage` over ofetch's generic wrapper text.
+ */
+export function errorMessage(error: unknown, fallback = 'Something went wrong.'): string {
+  if (typeof error !== 'object' || error === null) return fallback
+
+  if ('data' in error) {
+    const data = error.data
+    if (typeof data === 'string' && data) return data
+    if (typeof data === 'object' && data !== null && 'statusMessage' in data) {
+      const message = data.statusMessage
+      if (typeof message === 'string' && message) return message
+    }
+  }
+  if ('statusMessage' in error && typeof error.statusMessage === 'string' && error.statusMessage) {
+    return error.statusMessage
+  }
+  if ('message' in error && typeof error.message === 'string' && error.message) {
+    return error.message
+  }
+  return fallback
+}

@@ -8,5 +8,6 @@ import { MotionConfig } from 'motion-v'
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <Toaster position="bottom-right" />
   </MotionConfig>
 </template>
