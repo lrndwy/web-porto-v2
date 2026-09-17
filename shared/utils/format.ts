@@ -51,3 +51,33 @@ export function formatMonthRange(
   if (isCurrent) return `${from} — Present`
   return `${from} — ${end ? end.slice(0, 4) : 'Present'}`
 }
+
+/**
+ * How long a role lasted, in whole months: '1 yr 8 mo', '7 mo'.
+ *
+ * Both ends are inclusive — a role that started and ended in the same month
+ * reads as '1 mo', not '0 mo'. A current role is measured to today.
+ */
+export function formatDuration(
+  start: string,
+  end: string | null,
+  isCurrent: boolean,
+  now = new Date(),
+): string {
+  const from = new Date(start)
+  if (Number.isNaN(from.getTime())) return '—'
+
+  const to = isCurrent || !end ? now : new Date(end)
+  if (Number.isNaN(to.getTime())) return '—'
+
+  const months = Math.max(
+    1,
+    (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth()) + 1,
+  )
+
+  const years = Math.floor(months / 12)
+  const remainder = months % 12
+  if (years && remainder) return `${years} yr ${remainder} mo`
+  if (years) return `${years} yr`
+  return `${months} mo`
+}

@@ -3,7 +3,12 @@ import assert from 'node:assert/strict'
 
 import { slugify, uniqueSlug } from '../../shared/utils/slug.ts'
 import { isBotUserAgent, parseUserAgent } from '../../shared/utils/ua.ts'
-import { formatDate, formatMonthRange, formatPercent } from '../../shared/utils/format.ts'
+import {
+  formatDate,
+  formatDuration,
+  formatMonthRange,
+  formatPercent,
+} from '../../shared/utils/format.ts'
 
 const CHROME_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -105,4 +110,25 @@ test('formatDate renders a stable UTC date and a dash for null', () => {
 test('formatMonthRange covers current and finished roles', () => {
   assert.equal(formatMonthRange('2026-01-01', null, true), '2026 — Present')
   assert.equal(formatMonthRange('2024-03-01', '2026-02-28', false), '2024 — 2026')
+})
+
+test('formatDuration counts whole months inclusively', () => {
+  const now = new Date('2026-09-18T00:00:00Z')
+
+  // Same month start and end is one month, not zero.
+  assert.equal(formatDuration('2026-09-01', '2026-09-30', false, now), '1 mo')
+  assert.equal(formatDuration('2026-03-01', '2026-09-30', false, now), '7 mo')
+  assert.equal(formatDuration('2025-01-01', '2026-08-31', false, now), '1 yr 8 mo')
+  assert.equal(formatDuration('2024-01-01', '2025-12-31', false, now), '2 yr')
+})
+
+test('formatDuration measures a current role to today', () => {
+  const now = new Date('2026-09-18T00:00:00Z')
+  assert.equal(formatDuration('2026-01-01', null, true, now), '9 mo')
+  // A stored end date is ignored while the role is current.
+  assert.equal(formatDuration('2026-01-01', '2026-02-01', true, now), '9 mo')
+})
+
+test('formatDuration refuses to guess from an unparseable date', () => {
+  assert.equal(formatDuration('not-a-date', null, false), '—')
 })

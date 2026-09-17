@@ -24,11 +24,14 @@ const currentRole = computed(() => experiences.value?.find((role) => role.is_cur
 
 const careerStats = computed(() => {
   const roles = experiences.value ?? []
+  if (!roles.length) return []
   const firstStart = roles.map((role) => role.start_date).sort()[0]?.slice(0, 4)
+  const current = roles.find((role) => role.is_current)
   return [
     { label: 'Since', value: firstStart ?? '—' },
     { label: 'Roles held', value: String(roles.length) },
     { label: 'Organisations', value: String(new Set(roles.map((role) => role.organization)).size) },
+    { label: 'Currently', value: current ? current.organization : 'Open to work' },
   ]
 })
 
@@ -154,34 +157,33 @@ const heroStats = computed(() => {
       </div>
     </SectionShell>
 
-    <!-- Experience: a stat rail beside the timeline, so the section reads as a
-         career summary rather than a short list floating in whitespace. -->
+    <!-- Experience: a full-width summary strip over the timeline, so the section
+         reads as a career changelog rather than a short list in whitespace. -->
     <SectionShell v-if="experiences?.length" id="experience">
-      <div class="grid gap-12 lg:grid-cols-[minmax(0,19rem)_1fr] lg:gap-16">
-        <div class="flex flex-col gap-8 lg:sticky lg:top-24 lg:self-start">
-          <SectionHeading overline="Career" title="Experience" />
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <SectionHeading overline="Career" title="Experience" />
+        <Button as-child variant="outline" class="rounded-full active:scale-[0.98]">
+          <NuxtLink to="/experience">
+            Full history
+            <Icon name="ph:arrow-right" />
+          </NuxtLink>
+        </Button>
+      </div>
 
-          <dl class="divide-border border-border divide-y border-t">
-            <div v-for="stat in careerStats" :key="stat.label" class="flex items-baseline justify-between gap-4 py-3">
-              <dt class="text-caption text-muted-foreground">{{ stat.label }}</dt>
-              <dd class="text-right font-mono text-sm">{{ stat.value }}</dd>
-            </div>
-          </dl>
-
-          <div v-if="currentRole" class="border-border bg-card/60 flex flex-col gap-1 rounded-lg border p-4">
-            <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Currently</p>
-            <p class="text-subtitle">{{ currentRole.title }}</p>
-            <p class="text-caption text-muted-foreground">{{ currentRole.organization }}</p>
-          </div>
-
-          <Button as-child variant="outline" class="self-start active:translate-y-px">
-            <NuxtLink to="/experience">Full history</NuxtLink>
-          </Button>
+      <dl
+        v-if="careerStats.length"
+        class="divide-border border-border shadow-surface mt-8 grid divide-y rounded-xl border sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x"
+      >
+        <div v-for="stat in careerStats" :key="stat.label" class="flex flex-col gap-1 p-5">
+          <dt class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+            {{ stat.label }}
+          </dt>
+          <dd class="text-subtitle font-mono break-words">{{ stat.value }}</dd>
         </div>
+      </dl>
 
-        <div>
-          <ExperienceTimeline :experiences="latestExperiences" />
-        </div>
+      <div class="mt-12">
+        <ExperienceTimeline :experiences="latestExperiences" />
       </div>
     </SectionShell>
 
