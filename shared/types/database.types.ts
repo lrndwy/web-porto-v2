@@ -50,13 +50,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       ai_api_keys: {
@@ -91,13 +91,13 @@ export type Database = {
           revoked_at?: string | null
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       ai_models: {
@@ -135,13 +135,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["provider_id"]
-          isOneToOne: false
-          referencedRelation: "ai_providers"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "ai_providers"
+            referencedColumns: ["id"]
+          }
         ]
       }
       ai_providers: {
@@ -150,6 +150,7 @@ export type Database = {
           name: string
           base_url: string
           secret_api_key: string | null
+          format: string
           is_active: boolean
           created_at: string
           updated_at: string
@@ -159,6 +160,7 @@ export type Database = {
           name: string
           base_url: string
           secret_api_key?: string | null
+          format?: string
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -168,18 +170,19 @@ export type Database = {
           name?: string
           base_url?: string
           secret_api_key?: string | null
+          format?: string
           is_active?: boolean
           created_at?: string
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       ai_rate_limits: {
@@ -208,13 +211,13 @@ export type Database = {
           expires_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       ai_router_settings: {
@@ -252,13 +255,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       ai_usage_logs: {
@@ -305,27 +308,27 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["api_key_id"]
-          isOneToOne: false
-          referencedRelation: "ai_api_keys"
-          referencedColumns: ["id"]
-        },
-        {
-          foreignKeyName: ""
-          columns: ["model_id"]
-          isOneToOne: false
-          referencedRelation: "ai_models"
-          referencedColumns: ["id"]
-        },
-        {
-          foreignKeyName: ""
-          columns: ["provider_id"]
-          isOneToOne: false
-          referencedRelation: "ai_providers"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "ai_api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: ""
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: ""
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "ai_providers"
+            referencedColumns: ["id"]
+          }
         ]
       }
       analytics_events: {
@@ -357,20 +360,20 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["session_id"]
-          isOneToOne: false
-          referencedRelation: "analytics_sessions"
-          referencedColumns: ["id"]
-        },
-        {
-          foreignKeyName: ""
-          columns: ["visitor_id"]
-          isOneToOne: false
-          referencedRelation: "analytics_visitors"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: ""
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_visitors"
+            referencedColumns: ["id"]
+          }
         ]
       }
       analytics_pageviews: {
@@ -402,20 +405,20 @@ export type Database = {
           duration_ms?: number | null
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["session_id"]
-          isOneToOne: false
-          referencedRelation: "analytics_sessions"
-          referencedColumns: ["id"]
-        },
-        {
-          foreignKeyName: ""
-          columns: ["visitor_id"]
-          isOneToOne: false
-          referencedRelation: "analytics_visitors"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: ""
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_visitors"
+            referencedColumns: ["id"]
+          }
         ]
       }
       analytics_sessions: {
@@ -447,13 +450,13 @@ export type Database = {
           referrer?: string | null
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["visitor_id"]
-          isOneToOne: false
-          referencedRelation: "analytics_visitors"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "analytics_visitors"
+            referencedColumns: ["id"]
+          }
         ]
       }
       analytics_visitors: {
@@ -491,13 +494,13 @@ export type Database = {
           os?: string | null
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       blog_categories: {
@@ -523,13 +526,13 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       blog_post_tags: {
@@ -546,20 +549,20 @@ export type Database = {
           tag_id?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["post_id"]
-          isOneToOne: false
-          referencedRelation: "blog_posts"
-          referencedColumns: ["id"]
-        },
-        {
-          foreignKeyName: ""
-          columns: ["tag_id"]
-          isOneToOne: false
-          referencedRelation: "blog_tags"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: ""
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "blog_tags"
+            referencedColumns: ["id"]
+          }
         ]
       }
       blog_posts: {
@@ -612,20 +615,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["author_id"]
-          isOneToOne: false
-          referencedRelation: "users"
-          referencedColumns: ["id"]
-        },
-        {
-          foreignKeyName: ""
-          columns: ["category_id"]
-          isOneToOne: false
-          referencedRelation: "blog_categories"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: ""
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          }
         ]
       }
       blog_tags: {
@@ -648,13 +651,13 @@ export type Database = {
           created_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       documents: {
@@ -695,13 +698,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       educations: {
@@ -748,13 +751,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       experiences: {
@@ -804,13 +807,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       github_repositories: {
@@ -866,13 +869,13 @@ export type Database = {
           synced_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       github_settings: {
@@ -904,13 +907,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       navigation_items: {
@@ -948,13 +951,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       profiles: {
@@ -1007,13 +1010,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       site_settings: {
@@ -1051,13 +1054,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       socials: {
@@ -1095,13 +1098,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: []
-          isOneToOne: false
-          referencedRelation: ""
-          referencedColumns: []
-        }
+          {
+            foreignKeyName: ""
+            columns: []
+            isOneToOne: false
+            referencedRelation: ""
+            referencedColumns: []
+          }
         ]
       }
       user_profiles: {
@@ -1130,13 +1133,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-        {
-          foreignKeyName: ""
-          columns: ["id"]
-          isOneToOne: false
-          referencedRelation: "users"
-          referencedColumns: ["id"]
-        }
+          {
+            foreignKeyName: ""
+            columns: ["id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
         ]
       }
     }

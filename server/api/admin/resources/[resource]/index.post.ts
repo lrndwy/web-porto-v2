@@ -19,6 +19,12 @@ export default defineEventHandler(async (event) => {
   const values: Record<string, unknown> = def.normalize ? def.normalize(validated) : validated
   const client = untypedClient(event)
 
+  // Taxonomy tables require a unique slug; the form only asks for a name.
+  if (def.slugFrom && values.slug === undefined) {
+    const seed = String(values[def.slugFrom] ?? '')
+    values.slug = await uniqueTableSlug(client, def.table, slugify(seed))
+  }
+
   // New rows land at the end of the manual order.
   if (def.orderColumn && values[def.orderColumn] === undefined) {
     const { data: lastRow } = await client

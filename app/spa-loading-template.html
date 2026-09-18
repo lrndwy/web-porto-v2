@@ -1,0 +1,43 @@
+<!--
+  Shown inside #__nuxt until the client app mounts. The admin area is
+  `ssr: false`, so without this the first paint is an empty page while the JS
+  bundle loads and the session is checked.
+-->
+<div class="spa-loading">
+  <span class="spa-loading__spinner" role="status" aria-label="Loading"></span>
+</div>
+
+<style>
+  .spa-loading {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #fafafa;
+  }
+
+  html.dark .spa-loading {
+    background: #0a0a0a;
+  }
+
+  .spa-loading__spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    border: 2px solid rgba(120, 120, 120, 0.25);
+    border-top-color: rgba(120, 120, 120, 0.75);
+    animation: spa-loading-spin 0.7s linear infinite;
+  }
+
+  @keyframes spa-loading-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spa-loading__spinner {
+      animation-duration: 1.6s;
+    }
+  }
+</style>

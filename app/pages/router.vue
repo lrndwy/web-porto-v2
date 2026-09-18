@@ -14,12 +14,27 @@ useSeo({
 // looks usable and then fails at the first request.
 const displayKey = computed(() => info.value?.key ?? null)
 
-const curlExample = computed(
-  () => `curl ${info.value?.endpoint ?? 'https://example.com/api/router'} \\
-  -H "Authorization: Bearer ${info.value?.key ?? '$PUBLIC_KEY'}" \\
+const model = computed(() => info.value?.models[0]?.display_name ?? 'model-name')
+const key = computed(() => info.value?.key ?? '$PUBLIC_KEY')
+
+const openaiExample = computed(
+  () => `curl ${info.value?.openaiEndpoint ?? 'https://example.com/v1/chat/completions'} \\
+  -H "Authorization: Bearer ${key.value}" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "${info.value?.models[0]?.display_name ?? 'model-name'}",
+    "model": "${model.value}",
+    "messages": [{ "role": "user", "content": "Hello" }]
+  }'`,
+)
+
+const anthropicExample = computed(
+  () => `curl ${info.value?.anthropicEndpoint ?? 'https://example.com/v1/messages'} \\
+  -H "x-api-key: ${key.value}" \\
+  -H "anthropic-version: 2023-06-01" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "${model.value}",
+    "max_tokens": 256,
     "messages": [{ "role": "user", "content": "Hello" }]
   }'`,
 )
@@ -54,12 +69,7 @@ const percentUsed = computed(() => {
           <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">Endpoint</p>
           <p class="font-mono text-base break-all md:text-lg">{{ info.endpoint }}</p>
         </div>
-        <Button shape="pill" as-child variant="outline" class="shrink-0 self-start active:translate-y-px md:self-auto">
-          <a :href="info.endpoint" target="_blank" rel="noopener noreferrer">
-            <Icon name="ph:arrow-up-right" />
-            Open endpoint
-          </a>
-        </Button>
+        <CopyButton :value="info.endpoint" label="Copy the gateway base URL" />
       </div>
 
       <div class="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
@@ -84,17 +94,29 @@ const percentUsed = computed(() => {
             </p>
           </div>
 
-          <!-- Example -->
+          <!-- Examples: one per supported request shape. -->
           <div class="flex min-w-0 flex-col gap-3">
             <div class="flex items-center justify-between gap-3">
               <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
-                Example request
+                OpenAI-compatible
               </p>
-              <CopyButton :value="curlExample" label="Copy the curl example" />
+              <CopyButton :value="openaiExample" label="Copy the OpenAI example" />
             </div>
             <pre
               class="border-border bg-muted/70 w-full min-w-0 overflow-x-auto rounded-xl border p-5 font-mono text-sm leading-relaxed"
-            >{{ curlExample }}</pre>
+            >{{ openaiExample }}</pre>
+          </div>
+
+          <div class="flex min-w-0 flex-col gap-3">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
+                Anthropic-compatible
+              </p>
+              <CopyButton :value="anthropicExample" label="Copy the Anthropic example" />
+            </div>
+            <pre
+              class="border-border bg-muted/70 w-full min-w-0 overflow-x-auto rounded-xl border p-5 font-mono text-sm leading-relaxed"
+            >{{ anthropicExample }}</pre>
           </div>
         </div>
 

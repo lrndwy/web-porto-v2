@@ -224,7 +224,7 @@ Header:
 AI Router
 ● Operational
 
-https://domain.com/api/router
+https://domain.com/v1
 ```
 
 KPI:

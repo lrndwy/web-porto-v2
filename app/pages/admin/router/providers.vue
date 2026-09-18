@@ -3,10 +3,13 @@ import { toast } from 'vue-sonner'
 
 definePageMeta({ layout: 'admin', title: 'Providers' })
 
+type ProviderFormat = 'openai' | 'anthropic'
+
 interface Provider {
   id: string
   name: string
   base_url: string
+  format: ProviderFormat
   is_active: boolean
   has_secret: boolean
 }
@@ -30,11 +33,23 @@ const showSecret = ref(false)
 const testResult = ref<Record<string, { ok: boolean; status: number; modelCount?: number; error?: string }>>({})
 const testing = ref<string | null>(null)
 
-const form = reactive({ name: '', base_url: '', secret_api_key: '', is_active: true })
+const form = reactive({
+  name: '',
+  base_url: '',
+  format: 'openai' as ProviderFormat,
+  secret_api_key: '',
+  is_active: true,
+})
 
 function openCreate() {
   editing.value = null
-  Object.assign(form, { name: '', base_url: '', secret_api_key: '', is_active: true })
+  Object.assign(form, {
+    name: '',
+    base_url: '',
+    format: 'openai' as ProviderFormat,
+    secret_api_key: '',
+    is_active: true,
+  })
   showSecret.value = false
   dialogOpen.value = true
 }
@@ -44,6 +59,7 @@ function openEdit(provider: Provider) {
   Object.assign(form, {
     name: provider.name,
     base_url: provider.base_url,
+    format: provider.format,
     secret_api_key: '',
     is_active: provider.is_active,
   })
@@ -57,6 +73,7 @@ async function save() {
     const body: Record<string, unknown> = {
       name: form.name.trim(),
       base_url: form.base_url.trim(),
+      format: form.format,
       is_active: form.is_active,
     }
     // An untouched field means "keep the stored secret".
@@ -160,6 +177,9 @@ async function confirmRemove() {
 
         <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
           <span class="text-caption text-muted-foreground font-mono">
+            {{ provider.format === 'anthropic' ? 'Anthropic' : 'OpenAI-compatible' }}
+          </span>
+          <span class="text-caption text-muted-foreground font-mono">
             {{ activeModelCount(provider.id) }} active models
           </span>
           <StatusDot
@@ -206,7 +226,8 @@ async function confirmRemove() {
         <DialogHeader>
           <DialogTitle>{{ editing ? 'Manage provider' : 'Add provider' }}</DialogTitle>
           <DialogDescription>
-            Requests are sent to <span class="font-mono">{base_url}/chat/completions</span>.
+            Requests are sent to
+            <span class="font-mono">{{ form.base_url }}{{ form.format === 'anthropic' ? '/messages' : '/chat/completions' }}</span>.
           </DialogDescription>
         </DialogHeader>
 
@@ -219,6 +240,22 @@ async function confirmRemove() {
           <Field>
             <FieldLabel for="provider-url">Base URL</FieldLabel>
             <Input id="provider-url" v-model="form.base_url" placeholder="https://api.openai.com/v1" />
+          </Field>
+
+          <Field>
+            <FieldLabel for="provider-format">Format</FieldLabel>
+            <Select :model-value="form.format" @update:model-value="form.format = String($event) as ProviderFormat">
+              <SelectTrigger id="provider-format" class="w-full">
+                <SelectValue placeholder="Select a format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="openai">OpenAI-compatible</SelectItem>
+                <SelectItem value="anthropic">Anthropic Messages</SelectItem>
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              The wire format this provider speaks. The gateway translates requests and responses when a client uses the other one.
+            </FieldDescription>
           </Field>
 
           <Field>
@@ -239,8 +276,11 @@ async function confirmRemove() {
             </FieldDescription>
           </Field>
 
-          <Field>
-            <FieldLabel for="provider-active">Active</FieldLabel>
+          <Field orientation="horizontal">
+            <FieldContent>
+              <FieldLabel for="provider-active">Active</FieldLabel>
+              <FieldDescription>Inactive providers are skipped when routing.</FieldDescription>
+            </FieldContent>
             <Switch id="provider-active" v-model="form.is_active" />
           </Field>
         </div>

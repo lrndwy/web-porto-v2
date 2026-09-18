@@ -296,7 +296,7 @@ Multiple AI providers.
 Endpoint:
 
 ``` text
-https://domain.com/api/router
+https://domain.com/v1
 ```
 
 Public API key:
@@ -334,7 +334,7 @@ Gemini
 ### API Example
 
 ``` bash
-curl https://domain.com/api/router \
+curl https://domain.com/v1/chat/completions \
   -H "Authorization: Bearer pk_uhuy_xxx" \
   -H "Content-Type: application/json" \
   -d '{

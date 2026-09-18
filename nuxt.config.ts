@@ -78,7 +78,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/api/router': { cors: true },
+    '/v1/**': { cors: true },
     '/admin/**': { ssr: false, headers: { 'x-frame-options': 'DENY' } },
 
     // Caching is a production concern only. In development a cached SSR
@@ -86,11 +86,11 @@ export default defineNuxtConfig({
     // like a broken build.
     ...(isProduction
       ? {
-          '/': { swr: 300 },
-          '/projects': { swr: 600 },
-          '/blog': { swr: 600 },
-          '/blog/**': { swr: 600 },
-        }
+        '/': { swr: 300 },
+        '/projects': { swr: 600 },
+        '/blog': { swr: 600 },
+        '/blog/**': { swr: 600 },
+      }
       : {}),
 
     // Baseline response headers for everything else.
@@ -106,5 +106,5 @@ export default defineNuxtConfig({
 
   sitemap: { sources: ['/api/__sitemap__/urls'] },
 
-  robots: { disallow: ['/admin', '/api'] },
+  robots: { disallow: ['/admin', '/api', '/v1'] },
 })

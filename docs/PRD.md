@@ -245,15 +245,18 @@ Editor menggunakan WYSIWYG.
 
 ### 7.9 AI Router
 
-AI Router menjadi public gateway dengan endpoint tunggal.
+AI Router menjadi public gateway dengan path standar AI, bukan
+`/api/router`.
 
-Contoh:
+Endpoint:
 
-`POST /api/router`
+-   `POST /v1/chat/completions` --- OpenAI-compatible,
+-   `POST /v1/messages` --- Anthropic Messages,
+-   `GET /v1/models` --- daftar model OpenAI-compatible.
 
 Client menggunakan:
 
--   public API key
+-   public API key (`Authorization: Bearer` atau `x-api-key`)
 -   model
 -   messages/request payload
 
@@ -276,8 +279,12 @@ Owner dapat menambahkan:
 
 -   provider name
 -   base URL
+-   format (`openai` atau `anthropic`)
 -   secret API key
 -   active status
+
+Format menentukan bentuk request/response dan header auth upstream. Gateway
+menerjemahkan antara format client dan format provider bila berbeda.
 
 Provider dapat memiliki banyak model.
 

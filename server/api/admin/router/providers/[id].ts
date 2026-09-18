@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { providerUpdateSchema } from '#shared/schemas/router'
 import { untypedClient } from '~~/server/utils/resources'
 
-const SELECT = 'id, name, base_url, is_active, created_at, updated_at'
+const SELECT = 'id, name, base_url, format, is_active, created_at, updated_at'
 
 export default defineEventHandler(async (event) => {
   await requireOwner(event)
@@ -25,9 +25,8 @@ export default defineEventHandler(async (event) => {
     if (modelCount) {
       throw createError({
         statusCode: 409,
-        statusMessage: `${modelCount} model${modelCount === 1 ? '' : 's'} still use this provider. Delete ${
-          modelCount === 1 ? 'it' : 'them'
-        } first, or deactivate the provider instead.`,
+        statusMessage: `${modelCount} model${modelCount === 1 ? '' : 's'} still use this provider. Delete ${modelCount === 1 ? 'it' : 'them'
+          } first, or deactivate the provider instead.`,
       })
     }
 

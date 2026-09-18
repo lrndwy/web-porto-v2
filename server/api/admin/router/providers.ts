@@ -2,7 +2,7 @@ import { providerCreateSchema } from '#shared/schemas/router'
 import { untypedClient } from '~~/server/utils/resources'
 
 /** The stored secret is never returned; `has_secret` stands in for it. */
-const SELECT = 'id, name, base_url, is_active, created_at, updated_at'
+const SELECT = 'id, name, base_url, format, is_active, created_at, updated_at'
 
 export default defineEventHandler(async (event) => {
   await requireOwner(event)

@@ -33,7 +33,7 @@ const columns: ColumnDef[] = [
   },
 ]
 
-const { items, total, page, pageSize, q, pending, refresh } = useResource('blog-posts', {
+const { items, total, page, pageSize, q, pending, refresh, remove } = useResource('blog-posts', {
   endpoint: '/api/admin/blog/posts',
   extraQuery: () => (status.value === 'all' ? {} : { status: status.value }),
 })
@@ -45,6 +45,28 @@ watch(status, () => {
 
 const rows = computed(() => items.value as unknown as Record<string, unknown>[])
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
+
+const deleteTarget = ref<Record<string, unknown> | null>(null)
+// reka-ui closes the dialog before the click handler runs, which clears
+// `deleteTarget`; the id is captured separately so the delete still fires.
+const deleteId = ref<string | null>(null)
+const deleting = ref(false)
+
+function requestDelete(row: Record<string, unknown>) {
+  deleteTarget.value = row
+  deleteId.value = String(row.id)
+}
+
+async function confirmDelete() {
+  if (!deleteId.value) return
+  deleting.value = true
+  const ok = await remove(deleteId.value)
+  deleting.value = false
+  if (ok) {
+    deleteTarget.value = null
+    deleteId.value = null
+  }
+}
 
 const router = useRouter()
 onMounted(refresh)
@@ -70,7 +92,13 @@ onMounted(refresh)
       >
         {{ option }}
       </Button>
-      <Button as-child class="ml-auto active:translate-y-px">
+      <Button as-child variant="outline" class="ml-auto active:translate-y-px">
+        <NuxtLink to="/admin/blog/taxonomy">
+          <Icon name="ph:tag" />
+          Categories &amp; tags
+        </NuxtLink>
+      </Button>
+      <Button as-child class="active:translate-y-px">
         <NuxtLink to="/admin/blog/new">
           <Icon name="ph:plus" />
           New article
@@ -117,6 +145,15 @@ onMounted(refresh)
             <Icon name="ph:arrow-up-right" />
           </a>
         </Button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Delete"
+          class="text-destructive hover:text-destructive"
+          @click="requestDelete(row)"
+        >
+          <Icon name="ph:trash" />
+        </Button>
       </template>
     </ResourceTable>
 
@@ -128,5 +165,26 @@ onMounted(refresh)
         <Button variant="outline" size="sm" :disabled="page >= totalPages || pending" @click="page += 1">Next</Button>
       </div>
     </div>
+
+    <AlertDialog :open="!!deleteTarget" @update:open="(open) => (!open ? (deleteTarget = null) : null)">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this article?</AlertDialogTitle>
+          <AlertDialogDescription>
+            “{{ deleteTarget?.title }}” is removed from the site immediately and cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel :disabled="deleting">Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            class="bg-destructive text-white hover:bg-destructive/90"
+            :disabled="deleting"
+            @click="confirmDelete"
+          >
+            {{ deleting ? 'Deleting…' : 'Delete' }}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>

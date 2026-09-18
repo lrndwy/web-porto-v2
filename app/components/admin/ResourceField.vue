@@ -27,7 +27,32 @@ function onSelect(next: unknown) {
 </script>
 
 <template>
-  <Field :class="wide ? 'md:col-span-2' : ''" :data-invalid="errorMessage ? true : undefined">
+  <!--
+    A switch is a horizontal row: the label and description take the free
+    space and the control keeps its intrinsic width. The vertical `Field`
+    would stretch the switch to `w-full`, which is what made the toggle look
+    broken.
+  -->
+  <Field
+    v-if="props.field.type === 'switch'"
+    orientation="horizontal"
+    class="md:col-span-2"
+    :data-invalid="errorMessage ? true : undefined"
+  >
+    <FieldContent>
+      <FieldLabel :for="props.field.name">{{ props.field.label }}</FieldLabel>
+      <FieldDescription v-if="props.field.description">{{ props.field.description }}</FieldDescription>
+      <FieldError :errors="errorMessage ? [errorMessage] : []" />
+    </FieldContent>
+    <Switch
+      :id="props.field.name"
+      :model-value="boolValue"
+      :aria-invalid="errorMessage ? true : undefined"
+      @update:model-value="value = $event"
+    />
+  </Field>
+
+  <Field v-else :class="wide ? 'md:col-span-2' : ''" :data-invalid="errorMessage ? true : undefined">
     <FieldLabel :for="props.field.name">{{ props.field.label }}</FieldLabel>
 
     <Input
@@ -68,13 +93,6 @@ function onSelect(next: unknown) {
         </SelectItem>
       </SelectContent>
     </Select>
-
-    <Switch
-      v-else-if="props.field.type === 'switch'"
-      :id="props.field.name"
-      :model-value="boolValue"
-      @update:model-value="value = $event"
-    />
 
     <ImageUploadField
       v-else-if="props.field.type === 'image'"

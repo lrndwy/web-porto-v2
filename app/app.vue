@@ -18,6 +18,7 @@ useHead({
 <template>
   <MotionConfig reduced-motion="user">
     <NuxtRouteAnnouncer />
+    <NuxtLoadingIndicator color="var(--primary)" :height="2" />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

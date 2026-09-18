@@ -5,16 +5,18 @@ import { serverSupabaseServiceRole } from '#supabase/server'
 import { resourceSchemas } from '#shared/schemas/resources'
 
 export interface ResourceDef {
-  table: string
-  insert: ZodType
-  update: ZodType
-  /** Column holding manual ordering; absent when the resource has no manual order. */
-  orderColumn?: string
-  defaultOrder: { column: string; ascending: boolean }
-  /** Columns matched by the list handler's `?q=`. */
-  searchColumns?: string[]
-  /** Normalises a validated payload before it is written. */
-  normalize?: (values: Record<string, unknown>) => Record<string, unknown>
+ table: string
+ insert: ZodType
+ update: ZodType
+ /** Column holding manual ordering; absent when the resource has no manual order. */
+ orderColumn?: string
+ defaultOrder: { column: string; ascending: boolean }
+ /** Columns matched by the list handler's `?q=`. */
+ searchColumns?: string[]
+ /** Column whose value seeds an auto-generated, unique `slug` on insert. */
+ slugFrom?: string
+ /** Normalises a validated payload before it is written. */
+ normalize?: (values: Record<string, unknown>) => Record<string, unknown>
 }
 
 /**
@@ -22,70 +24,72 @@ export interface ResourceDef {
  * resource means adding a row here and a schema in shared/schemas/resources.ts.
  */
 export const resources: Record<string, ResourceDef> = {
-  experience: {
-    table: 'experiences',
-    ...resourceSchemas.experience,
-    orderColumn: 'display_order',
-    defaultOrder: { column: 'display_order', ascending: true },
-    searchColumns: ['title', 'organization'],
-    // A current role must not keep a stale end date.
-    normalize: (values) =>
-      values.is_current === true ? { ...values, end_date: null } : values,
-  },
-  achievement: {
-    table: 'achievements',
-    ...resourceSchemas.achievement,
-    orderColumn: 'display_order',
-    defaultOrder: { column: 'display_order', ascending: true },
-    searchColumns: ['title', 'issuer'],
-  },
-  education: {
-    table: 'educations',
-    ...resourceSchemas.education,
-    orderColumn: 'display_order',
-    defaultOrder: { column: 'display_order', ascending: true },
-    searchColumns: ['institution', 'degree'],
-  },
-  socials: {
-    table: 'socials',
-    ...resourceSchemas.socials,
-    orderColumn: 'display_order',
-    defaultOrder: { column: 'display_order', ascending: true },
-    searchColumns: ['platform', 'username'],
-  },
-  documents: {
-    table: 'documents',
-    ...resourceSchemas.documents,
-    defaultOrder: { column: 'created_at', ascending: false },
-    searchColumns: ['name', 'version'],
-  },
-  navigation: {
-    table: 'navigation_items',
-    ...resourceSchemas.navigation,
-    orderColumn: 'display_order',
-    defaultOrder: { column: 'display_order', ascending: true },
-    searchColumns: ['label', 'path'],
-  },
-  'blog-categories': {
-    table: 'blog_categories',
-    ...resourceSchemas['blog-categories'],
-    defaultOrder: { column: 'name', ascending: true },
-    searchColumns: ['name'],
-  },
-  'blog-tags': {
-    table: 'blog_tags',
-    ...resourceSchemas['blog-tags'],
-    defaultOrder: { column: 'name', ascending: true },
-    searchColumns: ['name'],
-  },
+ experience: {
+  table: 'experiences',
+  ...resourceSchemas.experience,
+  orderColumn: 'display_order',
+  defaultOrder: { column: 'display_order', ascending: true },
+  searchColumns: ['title', 'organization'],
+  // A current role must not keep a stale end date.
+  normalize: (values) =>
+   values.is_current === true ? { ...values, end_date: null } : values,
+ },
+ achievement: {
+  table: 'achievements',
+  ...resourceSchemas.achievement,
+  orderColumn: 'display_order',
+  defaultOrder: { column: 'display_order', ascending: true },
+  searchColumns: ['title', 'issuer'],
+ },
+ education: {
+  table: 'educations',
+  ...resourceSchemas.education,
+  orderColumn: 'display_order',
+  defaultOrder: { column: 'display_order', ascending: true },
+  searchColumns: ['institution', 'degree'],
+ },
+ socials: {
+  table: 'socials',
+  ...resourceSchemas.socials,
+  orderColumn: 'display_order',
+  defaultOrder: { column: 'display_order', ascending: true },
+  searchColumns: ['platform', 'username'],
+ },
+ documents: {
+  table: 'documents',
+  ...resourceSchemas.documents,
+  defaultOrder: { column: 'created_at', ascending: false },
+  searchColumns: ['name', 'version'],
+ },
+ navigation: {
+  table: 'navigation_items',
+  ...resourceSchemas.navigation,
+  orderColumn: 'display_order',
+  defaultOrder: { column: 'display_order', ascending: true },
+  searchColumns: ['label', 'path'],
+ },
+ 'blog-categories': {
+  table: 'blog_categories',
+  ...resourceSchemas['blog-categories'],
+  defaultOrder: { column: 'name', ascending: true },
+  searchColumns: ['name'],
+  slugFrom: 'name',
+ },
+ 'blog-tags': {
+  table: 'blog_tags',
+  ...resourceSchemas['blog-tags'],
+  defaultOrder: { column: 'name', ascending: true },
+  searchColumns: ['name'],
+  slugFrom: 'name',
+ },
 }
 
 export function getResource(name: string | undefined): ResourceDef {
-  const def = name ? resources[name] : undefined
-  if (!def) {
-    throw createError({ statusCode: 404, statusMessage: 'unknown_resource' })
-  }
-  return def
+ const def = name ? resources[name] : undefined
+ if (!def) {
+  throw createError({ statusCode: 404, statusMessage: 'unknown_resource' })
+ }
+ return def
 }
 
 /**
@@ -95,12 +99,26 @@ export function getResource(name: string | undefined): ResourceDef {
  * reaches it has already been validated by the resource's zod schema.
  */
 export function untypedClient(event: H3Event): SupabaseClient {
-  return serverSupabaseServiceRole(event) as unknown as SupabaseClient
+ return serverSupabaseServiceRole(event) as unknown as SupabaseClient
 }
 
 /** Columns a client may sort by: the natural order plus the audit timestamps. */
 export function sortColumnsFor(def: ResourceDef): string[] {
-  return [...new Set([def.defaultOrder.column, 'created_at', 'updated_at'])]
+ return [...new Set([def.defaultOrder.column, 'created_at', 'updated_at'])]
+}
+
+/**
+ * A slug no other row in the table holds, derived from `base`. Taxonomy tables
+ * require a non-null unique slug, but the admin form only collects the name, so
+ * the slug is generated here rather than asked for.
+ */
+export async function uniqueTableSlug(
+ client: SupabaseClient,
+ table: string,
+ base: string,
+): Promise<string> {
+ const { data } = await client.from(table).select('slug').ilike('slug', `${base}%`)
+ return uniqueSlug(base, ((data ?? []) as { slug: string }[]).map((row) => row.slug))
 }
 
 /**
@@ -112,12 +130,12 @@ export function sortColumnsFor(def: ResourceDef): string[] {
  * conflating them turns "delete the children first" into a server error.
  */
 export function throwDbError(error: { code?: string; message: string }): never {
-  const statusCode =
-    error.code === '23505' || error.code === '23001'
-      ? 409
-      : error.code === '23514' || error.code === '23503'
-        ? 422
-        : 500
+ const statusCode =
+  error.code === '23505' || error.code === '23001'
+   ? 409
+   : error.code === '23514' || error.code === '23503'
+    ? 422
+    : 500
 
-  throw createError({ statusCode, statusMessage: error.message })
+ throw createError({ statusCode, statusMessage: error.message })
 }

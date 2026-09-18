@@ -287,10 +287,16 @@ Primary key:
   id               uuid PK
   name             text
   base_url         text
+  format           text          openai/anthropic
   secret_api_key   text
   is_active        boolean
   created_at       timestamptz
   updated_at       timestamptz
+
+`format` menentukan bentuk request/response upstream: `openai`
+(`/chat/completions`) atau `anthropic` (`/messages`). Default `openai`;
+constraint `check (format in ('openai', 'anthropic'))`. Gateway
+menerjemahkan antara format client dan format provider bila berbeda.
 
 `secret_api_key` harus diperlakukan sebagai secret. Jangan expose ke
 browser atau public API.

@@ -144,7 +144,8 @@ MVP model:
 
 Router:
 
-`POST /api/router`
+`POST /v1/chat/completions` (OpenAI-compatible) dan `POST /v1/messages`
+(Anthropic Messages).
 
 Validation:
 

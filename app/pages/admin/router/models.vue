@@ -283,8 +283,11 @@ function pricing(model: ModelRow) {
             </Field>
           </div>
 
-          <Field>
-            <FieldLabel for="model-active">Active</FieldLabel>
+          <Field orientation="horizontal">
+            <FieldContent>
+              <FieldLabel for="model-active">Active</FieldLabel>
+              <FieldDescription>Inactive models are refused by the router.</FieldDescription>
+            </FieldContent>
             <Switch id="model-active" v-model="form.is_active" />
           </Field>
         </div>
