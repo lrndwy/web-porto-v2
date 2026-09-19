@@ -54,27 +54,27 @@ const heroStats = computed(() => {
       <div
         class="page-shell grid gap-10 pt-12 pb-12 md:grid-cols-[1.45fr_1fr] md:items-end md:gap-16 md:pt-16 md:pb-14"
       >
-        <RevealOnScroll>
+        <RevealOnScroll class="flex flex-col items-start text-left">
           <p
-            class="border-border/70 bg-card/60 text-caption text-muted-foreground mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono tracking-[0.18em] uppercase backdrop-blur-sm"
+            class="border-border/70 bg-card/60 text-[9px] text-muted-foreground mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono tracking-[0.18em] uppercase backdrop-blur-sm"
           >
             <span class="bg-primary size-1.5 rounded-full" aria-hidden="true" />
             Available for selected opportunities
           </p>
 
-          <h1 class="text-display measure">
+          <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl md:text-display measure">
             <template v-if="profile?.name">Hi, I'm {{ profile.name }}.</template>
             <template v-else>Software, systems, and the web.</template>
           </h1>
 
-          <p v-if="profile?.title" class="text-subtitle text-muted-foreground mt-3">
+          <p v-if="profile?.title" class="text-base text-muted-foreground mt-3 sm:text-lg md:text-subtitle">
             {{ profile.title }}
           </p>
-          <p v-if="profile?.short_description" class="text-body text-muted-foreground measure mt-4">
+          <p v-if="profile?.short_description" class="text-sm text-muted-foreground measure mt-4 md:text-body">
             {{ profile.short_description }}
           </p>
 
-          <div class="mt-8 flex flex-wrap items-center gap-3">
+          <div class="mt-8 flex flex-wrap items-center justify-start gap-3">
             <MagneticCta to="/projects" label="View Projects" />
             <Button shape="pill" as-child variant="ghost" class="active:translate-y-px">
               <NuxtLink to="/about">
@@ -84,8 +84,8 @@ const heroStats = computed(() => {
             </Button>
           </div>
 
-          <dl v-if="heroStats.length" class="border-border/70 mt-10 grid max-w-xl grid-cols-3 gap-6 border-t pt-6">
-            <div v-for="stat in heroStats" :key="stat.label" class="flex flex-col gap-1">
+          <dl v-if="heroStats.length" class="border-border/70 mt-10 grid max-w-xl grid-cols-3 gap-4 border-t pt-6 sm:gap-6">
+            <div v-for="stat in heroStats" :key="stat.label" class="flex flex-col items-center text-left md:items-center md:text-left gap-1">
               <dt class="text-caption text-muted-foreground font-mono tracking-widest uppercase">
                 {{ stat.label }}
               </dt>
@@ -98,7 +98,7 @@ const heroStats = computed(() => {
           </div>
         </RevealOnScroll>
 
-        <RevealOnScroll :delay="0.08">
+        <RevealOnScroll :delay="0.08" class="flex flex-col items-center md:items-end">
           <div class="relative w-full max-w-xs md:justify-self-end">
             <img
               v-if="profile?.avatar_url"
@@ -106,7 +106,7 @@ const heroStats = computed(() => {
               :alt="profile.name ? `Portrait of ${profile.name}` : ''"
               width="420"
               height="525"
-              class="border-border aspect-[4/5] w-full rounded-xl border object-cover"
+              class="border-border aspect-[4/5] w-full rounded-xl border object-cover shadow-sm"
             >
             <div
               v-else
@@ -121,7 +121,7 @@ const heroStats = computed(() => {
 
             <p
               v-if="currentRole"
-              class="text-caption text-muted-foreground mt-3 text-right font-mono"
+              class="text-caption text-muted-foreground mt-3 text-center font-mono md:text-right"
             >
               {{ currentRole.organization }} · {{ currentRole.title }}
             </p>
@@ -241,6 +241,8 @@ const heroStats = computed(() => {
             </div>
 
             <div class="flex flex-col gap-4 lg:items-end">
+
+            <div class="flex flex-wrap gap-3 items-end">
               <Button shape="pill"
                 v-if="profile.email"
                 as-child
@@ -254,17 +256,14 @@ const heroStats = computed(() => {
                   </span>
                 </a>
               </Button>
-
-              <p v-if="profile.email" class="text-caption text-muted-foreground font-mono lg:text-right">
-                {{ profile.email }}
-              </p>
-
               <Button shape="pill" as-child variant="outline" size="lg" class="rounded-full active:scale-[0.98]">
                 <NuxtLink to="/cv">
                   <Icon name="ph:file-text" />
                   Download CV
                 </NuxtLink>
               </Button>
+            </div>
+
 
               <div v-if="socials?.length" class="lg:pt-2">
                 <SocialLinks :socials="socials" />
